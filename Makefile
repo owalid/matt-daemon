@@ -1,7 +1,7 @@
 CPP = c++
 
 SRC = Mattdaemon.cpp
-CPPFLAGS = -std=c++98 -pedantic -Wall -Wextra -O2
+CPPFLAGS = -std=c++11 -pedantic -Wall -Wextra -O2
 NAME = Matt_daemon
 
 SRCDIR = ./src
