@@ -30,6 +30,13 @@ void daemonize()
 
 int main(int argc, char *argv[])
 {
+  // check if the user is root
+  if (getuid() != 0)
+  {
+    std::cout << "You must be root to run this program" << '\n';
+    return 1;
+  }
+  std::cout << "hello world from mattdeamon" << '\n';
   daemonize();
   while (1)
     ;

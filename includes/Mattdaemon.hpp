@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
+#include <unistd.h>
 
 // For daemonize
 #include <stdio.h>
