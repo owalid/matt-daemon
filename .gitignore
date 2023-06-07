@@ -38,4 +38,4 @@ Matt_daemon
 docker_config
 
 #vscode
-.vscode
+.vscode/*
