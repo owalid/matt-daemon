@@ -93,13 +93,23 @@ std::string Tintin_reporter::createTimestamp()
 	std::tm *timeStruct = std::localtime(&timeInSecond);
 	std::string timeString;
 
-	timeString.append("[" \
-	+ std::to_string(timeStruct->tm_mday) + "/" \
-	+ std::to_string(timeStruct->tm_mon + 1) + "/" \
-	+ std::to_string(timeStruct->tm_year + 1900) + "-" \
-	+ std::to_string(timeStruct->tm_hour) + ":" \
-	+ std::to_string(timeStruct->tm_min) + ":" \
-	+ std::to_string(timeStruct->tm_sec) + "]");
+	timeString.append("[");
+	if (timeStruct->tm_mday < 10)
+		timeString.append("0");
+	timeString.append(std::to_string(timeStruct->tm_mday) + "/");
+	if (timeStruct->tm_mon < 10)
+		timeString.append("0");
+	timeString.append(std::to_string(timeStruct->tm_mon + 1) + "/");
+	timeString.append(std::to_string(timeStruct->tm_year + 1900) + "-");
+	if (timeStruct->tm_hour < 10)
+		timeString.append("0");
+	timeString.append(std::to_string(timeStruct->tm_hour) + ":");
+	if (timeStruct->tm_min < 10)
+		timeString.append("0");
+	timeString.append(std::to_string(timeStruct->tm_min) + ":");
+	if (timeStruct->tm_sec < 10)
+		timeString.append("0");
+	timeString.append(std::to_string(timeStruct->tm_sec) + "]");
 	return timeString;
 }
 
@@ -122,7 +132,7 @@ std::string Tintin_reporter::getEventValueFromEnum(const EventEnum &ev)
 		return "Server created";
 		break;
 	case DEAMON_MODE_STARTED:
-		return "Entering deamon mode.";
+		return "Entering daemon mode.";
 		break;
 	case SERVER_STARTED_PID:
 		return "Started. PID : ";
