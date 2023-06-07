@@ -32,17 +32,24 @@ void daemonize(Tintin_reporter &logger)
 
 int main(int argc, char *argv[])
 {
-  Tintin_reporter logger;
+  try {
+    Tintin_reporter logger;
 
-  //check if the user is root
-  if (getuid() != 0)
+    //check if the user is root
+    if (getuid() != 0)
+    {
+      std::cout << "You must be root to run this program" << '\n';
+      return 1;
+    }
+    std::cout << "hello world from mattdeamon" << '\n';
+    daemonize(logger);
+    while (1)
+      ;
+  }
+  catch (const std::runtime_error &e)
   {
-    std::cout << "You must be root to run this program" << '\n';
+    std::cerr << e.what() << std::endl;
     return 1;
   }
-  std::cout << "hello world from mattdeamon" << '\n';
-  daemonize(logger);
-  while (1)
-    ;
   return 0;
 }

@@ -69,6 +69,8 @@ void Tintin_reporter::addEventToLogFile(Event &ev)
 {
 	if (std::filesystem::exists(LOG_DIRECTORY) == false)
 		std::filesystem::create_directory(LOG_DIRECTORY);
+	if (std::filesystem::exists(LOG_DIRECTORY) == false)
+		throw std::runtime_error("Could not the directory /var/log/matt_daemon.");
 	std::ofstream logfile(LOG_PATH, std::ios_base::app);
 	if (logfile.is_open())
 	{
@@ -76,10 +78,7 @@ void Tintin_reporter::addEventToLogFile(Event &ev)
 		logfile.close();
 	}
 	else
-	{
-		std::cerr << "cannot open the file." << std::endl;
-		exit (1);
-	}
+		throw std::runtime_error("Could not create the file matt_daemon.log.");
 }
 
 /**
