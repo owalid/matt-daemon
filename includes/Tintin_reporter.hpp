@@ -3,6 +3,7 @@
 
 # include <iostream>
 # include <fstream>
+# include <filesystem>
 # include <string>
 # include <vector>
 # include <map>
@@ -10,7 +11,8 @@
 # include "Event.hpp"
 # include "EventEnum.hpp"
 # include "CategoryEnum.hpp"
-# define LOG_PATH "/var/log/matt_deamon.log"
+# define LOG_DIRECTORY "/var/log/matt_deamon"
+# define LOG_PATH "/var/log/matt_deamon/matt_deamon.log"
 
 class Tintin_reporter
 {
