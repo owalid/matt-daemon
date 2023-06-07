@@ -11,8 +11,8 @@
 # include "Event.hpp"
 # include "EventEnum.hpp"
 # include "CategoryEnum.hpp"
-# define LOG_DIRECTORY "/var/log/matt_deamon"
-# define LOG_PATH "/var/log/matt_deamon/matt_deamon.log"
+# define LOG_DIRECTORY "/var/log/matt_daemon"
+# define LOG_PATH "/var/log/matt_daemon/matt_daemon.log"
 
 class Tintin_reporter
 {
