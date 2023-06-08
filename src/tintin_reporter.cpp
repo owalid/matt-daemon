@@ -128,7 +128,13 @@ std::string TintinReporter::GetEventFromEnum(const EventEnum &ev)
       return "Signal handler.";
       break;
     case errorFileLock:
-      return "Error file lock.";
+      return "Cannot lock the lockfile.";
+      break;
+    case errorFileUnlock:
+      return "cannot unlock the lockfile.";
+      break;
+    case errorNonRootUser:
+      return "Non root user launched the program.";
       break;
     case userInput:
       return "User input : ";

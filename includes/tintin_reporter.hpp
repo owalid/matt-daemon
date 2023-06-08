@@ -34,7 +34,6 @@ class TintinReporter
     void MakeNewEvent(std::string cat, std::string eventValue, std::string additionalValue);
     std::string GetCategoryFromEnum(const CategoryEnum &catEnum);
     std::string GetEventFromEnum(const EventEnum &eventEnum);
-
   private:
     void AddEventToList(Event &ev);
     void AddEventToLogFile(Event &ev);

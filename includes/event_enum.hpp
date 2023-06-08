@@ -9,6 +9,8 @@ enum EventEnum{
     signalHandler,
     programQuit,
     errorFileLock,
+    errorFileUnlock,
+    errorNonRootUser,
     userInput,
     userRequest
 };
