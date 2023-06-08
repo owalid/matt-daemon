@@ -36,3 +36,6 @@ Matt_daemon
 
 # Docker owalid
 docker_config
+
+#vscode
+.vscode/*

@@ -1,12 +1,10 @@
-
-#ifndef MATTDAEMON_HPP
-# define MATTDAEMON_HPP
+#ifndef MATT_DAEMON_HPP
+# define MATT_DAEMON_HPP
 
 // Global includes libraries
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
-#include <unistd.h>
 
 // For daemonize
 #include <stdio.h>

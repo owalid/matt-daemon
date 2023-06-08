@@ -1,6 +1,6 @@
 CPP = c++
 
-SRC = Mattdaemon.cpp
+SRC = matt_daemon.cpp event.cpp tintin_reporter.cpp
 CPPFLAGS = -std=c++11 -pedantic -Wall -Wextra -Werror -O2
 NAME = Matt_daemon
 
