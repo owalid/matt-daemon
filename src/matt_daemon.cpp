@@ -1,5 +1,5 @@
-#include "Mattdaemon.hpp"
-#include "Tintin_reporter.hpp"
+#include "matt_daemon.hpp"
+#include "tintin_reporter.hpp"
 
 void check_pid(pid_t pid)
 {
@@ -9,11 +9,11 @@ void check_pid(pid_t pid)
     exit(0);
 }
 
-void daemonize(Tintin_reporter &logger)
+void daemonize(TintinReporter &logger)
 {
   pid_t pid, sid;
 
-  logger.makeNewEvent(logger.getCategoryValueFromEnum(INFO), logger.getEventValueFromEnum(DEAMON_MODE_STARTED), "");
+  logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(daemonModeStarted), "");
   pid = fork(); // Parent process will terminated, the child process now runs in the background.
   check_pid(pid);
   sid = setsid(); // Create a new session.
@@ -27,21 +27,21 @@ void daemonize(Tintin_reporter &logger)
   close(STDIN_FILENO);
   close(STDOUT_FILENO);
   close(STDERR_FILENO);
-  logger.makeNewEvent(logger.getCategoryValueFromEnum(INFO), logger.getEventValueFromEnum(SERVER_STARTED_PID), std::to_string(getpid()));
+  logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(serverStartedPid), std::to_string(getpid()));
 }
 
 int main(int argc, char *argv[])
 {
-  try {
-    Tintin_reporter logger;
+  try
+  {
+    TintinReporter logger;
 
-    //check if the user is root
+    // check if the user is root
     if (getuid() != 0)
     {
       std::cout << "You must be root to run this program" << '\n';
       return 1;
     }
-    std::cout << "hello world from mattdeamon" << '\n';
     daemonize(logger);
     while (1)
       ;
