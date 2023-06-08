@@ -1,0 +1,11 @@
+name: Make checker
+
+on: ['push', 'pull_request']
+
+jobs:
+  build:
+    runs-on: debian-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: make
+      run: make
