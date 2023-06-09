@@ -30,6 +30,8 @@ void ReleaseLockFile(TintinReporter &logger, int fd_lock)
     logger.MakeNewEvent(logger.GetCategoryFromEnum(error), logger.GetEventFromEnum(errorFileUnlock), "");
     logger.MakeNewEvent(logger.GetCategoryFromEnum(error), logger.GetEventFromEnum(programQuit), \
       " Failure : " + std::to_string(EXIT_FAILURE));
+    std::remove(LOG_PATH);
     exit(EXIT_FAILURE);
   }
+  std::remove(LOG_PATH);
 }

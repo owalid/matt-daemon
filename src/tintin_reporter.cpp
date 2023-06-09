@@ -136,11 +136,17 @@ std::string TintinReporter::GetEventFromEnum(const EventEnum &ev)
     case errorNonRootUser:
       return "Non root user launched the program.";
       break;
+    case userConnection:
+      return "A new user is connected from : ";
+      break;
     case userInput:
       return "User input : ";
       break;
     case userRequest:
       return "Request : ";
+      break;
+    case connectionClosed:
+      return "A connection has been closed.";
       break;
     default:
       return "Unknown event.";

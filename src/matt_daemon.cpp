@@ -1,6 +1,7 @@
 #include "matt_daemon.hpp"
 #include "tintin_reporter.hpp"
 #include "utils.hpp"
+#include "server.hpp"
 
 void CheckPid(pid_t pid)
 {
@@ -36,6 +37,12 @@ void Daemonize(TintinReporter &logger)
 int main(int argc, char *argv[])
 {
   TintinReporter logger;
+  Server srv;
+  bool server_launched = false;
+  char remote_ip[INET6_ADDRSTRLEN];
+  int new_fd;
+  int len_of_received_datas;
+  char buffer[4096];
   int fd_lockfile = -1;
 
   try
@@ -51,8 +58,54 @@ int main(int argc, char *argv[])
     }
     Daemonize(logger);
     fd_lockfile = CreateLockFile(logger);
-    while (1)
-      ;
+    srv.InitServer();
+    logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(serverCreated), "");
+    for (;;)
+    {
+      srv.SetReadFd(srv.GetMasterFd());
+      if (select(srv.GetMaxFd() + 1, &srv.read_fd_, NULL, NULL, NULL) < 0)
+        continue;
+      for (int fd = 0; fd <= srv.GetMaxFd(); ++fd)
+      {
+        //connexion
+        if (FD_ISSET(fd, &srv.read_fd_))
+        {
+          //nouvelle connexion
+          if (fd == srv.GetListenerFd())
+          {
+            socklen_t remote_addr_len = sizeof(srv.GetClientAddr());
+            new_fd = accept(fd, (struct sockaddr *)&srv.client_addr_, &remote_addr_len);
+            if (new_fd == -1)
+              throw std::runtime_error("accept() failed.");
+            FD_SET(new_fd, &srv.master_fd_);
+            if (new_fd > srv.GetMaxFd())
+              srv.SetMaxFd(new_fd);
+            logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(userConnection), \
+            inet_ntop(srv.GetClientAddr().ss_family, srv.GetInAddr(), remote_ip , INET6_ADDRSTRLEN));
+          }
+          else // on reçoit des données.
+          {
+            len_of_received_datas = recv(fd, buffer, sizeof(buffer), 0);
+            if (len_of_received_datas <= 0)
+            {
+              if (len_of_received_datas == 0)
+              {
+                logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(connectionClosed), "");
+                close(fd);
+                FD_CLR(fd, &srv.master_fd_);
+              }
+            }
+            else
+            {
+              logger.MakeNewEvent(logger.GetCategoryFromEnum(log), logger.GetEventFromEnum(userRequest), buffer);
+              // Ici on devra traiter les données.
+              //clear du buffer.
+              memset(&buffer, 0, sizeof(buffer));
+            }
+          }
+        }
+      }
+    }
   }
   catch (const std::runtime_error &e)
   {

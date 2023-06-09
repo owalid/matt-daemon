@@ -11,8 +11,10 @@ enum EventEnum{
     errorFileLock,
     errorFileUnlock,
     errorNonRootUser,
+    userConnection,
     userInput,
-    userRequest
+    userRequest,
+    connectionClosed
 };
 
 #endif
