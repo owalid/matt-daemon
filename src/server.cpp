@@ -4,12 +4,14 @@
 Server::Server()
 {
   max_fd_ = 0;
+  number_of_connected_cli_ = 0;
   number_of_max_conn_ = 3;
 }
 
 Server::Server(const Server &copy)
 {
   listener_fd_ = copy.GetListenerFd();
+  number_of_connected_cli_ = copy.GetNumberOfConnectedCli();
   number_of_max_conn_ = copy.GetNumberOfMaxConn();
   master_fd_ = copy.GetMasterFd();
   read_fd_ = copy.GetReadFd();
@@ -27,6 +29,7 @@ Server &Server::operator=(const Server &assign)
 {
   listener_fd_ = assign.GetListenerFd();
   number_of_max_conn_ = assign.GetNumberOfMaxConn();
+  number_of_connected_cli_ = assign.GetNumberOfConnectedCli();
   master_fd_ = assign.GetMasterFd();
   read_fd_ = assign.GetReadFd();
   max_fd_ = assign.GetMaxFd();
@@ -44,6 +47,21 @@ int Server::GetListenerFd() const
 int Server::GetNumberOfMaxConn() const
 {
   return this->number_of_max_conn_;
+}
+
+void Server::SetNumberOfMaxConn(int max_conn)
+{
+  this->number_of_max_conn_ = max_conn;
+}
+
+int Server::GetNumberOfConnectedCli() const
+{
+  return this->number_of_connected_cli_;
+}
+
+void Server::SetNumberOfConnectedCli(int nb_of_cli)
+{
+  this->number_of_connected_cli_ = nb_of_cli;
 }
 
 fd_set Server::GetMasterFd() const
@@ -109,7 +127,7 @@ void Server::InitServer()
   if (cpy == nullptr)
     throw std::runtime_error("Unable to bind to any address.");
   freeaddrinfo(ai);
-  if (listen(this->listener_fd_, this->GetNumberOfMaxConn()) == -1)
+  if (listen(this->listener_fd_, SOMAXCONN) == -1)
     throw std::runtime_error("Unable to listen.");
   FD_SET(this->listener_fd_, &this->master_fd_);
   this->SetMaxFd(this->listener_fd_);

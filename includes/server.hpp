@@ -36,6 +36,9 @@ class Server
     // Getters / Setters
     int GetListenerFd() const;
     int GetNumberOfMaxConn() const;
+    void SetNumberOfMaxConn(int max_conn);
+    int GetNumberOfConnectedCli() const;
+    void SetNumberOfConnectedCli(int nb_of_cli);
     fd_set GetMasterFd() const;
     fd_set GetReadFd() const;
     void SetReadFd(fd_set read_fd);
@@ -49,6 +52,7 @@ class Server
   private:
     int listener_fd_;
     int number_of_max_conn_;
+    int number_of_connected_cli_;
     int max_fd_;
 };
 

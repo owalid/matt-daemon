@@ -77,11 +77,17 @@ int main(int argc, char *argv[])
             new_fd = accept(fd, (struct sockaddr *)&srv.client_addr_, &remote_addr_len);
             if (new_fd == -1)
               throw std::runtime_error("accept() failed.");
+            if (srv.GetNumberOfConnectedCli() + 1 > srv.GetNumberOfMaxConn())
+            {
+              close(new_fd);
+              continue;
+            }
             FD_SET(new_fd, &srv.master_fd_);
             if (new_fd > srv.GetMaxFd())
               srv.SetMaxFd(new_fd);
             logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(userConnection), \
             inet_ntop(srv.GetClientAddr().ss_family, srv.GetInAddr(), remote_ip , INET6_ADDRSTRLEN));
+            srv.SetNumberOfConnectedCli(srv.GetNumberOfConnectedCli() + 1);
           }
           else // on reçoit des données.
           {
@@ -94,6 +100,7 @@ int main(int argc, char *argv[])
                 close(fd);
                 FD_CLR(fd, &srv.master_fd_);
               }
+              srv.SetNumberOfConnectedCli(srv.GetNumberOfConnectedCli() - 1);
             }
             else
             {
