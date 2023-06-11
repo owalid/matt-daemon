@@ -3,6 +3,8 @@
 #include "utils.hpp"
 #include "server.hpp"
 
+int SIGNALS[] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGBUS, SIGFPE, SIGKILL, SIGUSR1, SIGSEGV, SIGUSR2, SIGPIPE, SIGALRM, SIGTERM, SIGCHLD, SIGCONT, SIGSTOP, SIGTSTP, SIGTTIN, SIGTTOU, SIGURG, SIGXCPU, SIGXFSZ, SIGVTALRM, SIGPROF, SIGWINCH, SIGIO, SIGPWR, SIGSYS, SIGRTMIN, SIGRTMIN+1, SIGRTMIN+2, SIGRTMIN+3, SIGRTMIN+4, SIGRTMIN+5, SIGRTMIN+6, SIGRTMIN+7, SIGRTMIN+8, SIGRTMIN+9, SIGRTMIN+10, SIGRTMIN+11, SIGRTMIN+12, SIGRTMIN+13, SIGRTMIN+14, SIGRTMIN+15, SIGRTMAX-14, SIGRTMAX-13, SIGRTMAX-12, SIGRTMAX-11, SIGRTMAX-10, SIGRTMAX-9, SIGRTMAX-8, SIGRTMAX-7, SIGRTMAX-6, SIGRTMAX-5, SIGRTMAX-4, SIGRTMAX-3, SIGRTMAX-2, SIGRTMAX-1, SIGRTMAX };
+
 void CheckPid(pid_t pid)
 {
   if (pid < 0)
@@ -34,6 +36,33 @@ void Daemonize(TintinReporter &logger)
   logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(serverStartedPid), std::to_string(getpid()));
 }
 
+bool CheckSignal(int signal_receive, int signal_candidate)
+{
+  // std::cout << "signal_receive : " << signal_receive << '\n';
+  // std::cout << "signal_candidate : " << signal_candidate << '\n';
+  if (signal_receive == signal_candidate)
+    return true;
+  return false;
+}
+
+void SignalHandler(int signal_num)
+{
+  bool is_valid = false;
+  int i = -1;
+  int signals_length = sizeof(SIGNALS)/sizeof(SIGNALS[0]); 
+ for (i = 0; i < signals_length; i++)
+  {
+    if (CheckSignal(signal_num, SIGNALS[i]))
+    {
+      std::cout << "Signal received : " << signal_num << '\n';
+      is_valid = true;
+      break;
+    }
+  }
+  if (!is_valid)
+    std::cout << "Invalid signal received : " << signal_num << '\n';
+}
+
 int main(int argc, char *argv[])
 {
   TintinReporter logger;
@@ -45,6 +74,8 @@ int main(int argc, char *argv[])
   char buffer[4096];
   int fd_lockfile = -1;
 
+  SignalHandler(1222);
+  exit(1);
   try
   {
     // check if the user is root

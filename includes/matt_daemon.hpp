@@ -15,4 +15,7 @@
 #include <sys/stat.h>
 #include <syslog.h>
 
+// For signal handler
+#include <csignal>
+
 #endif
