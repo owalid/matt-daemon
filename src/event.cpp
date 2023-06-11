@@ -53,5 +53,8 @@ std::string Event::GetEventDescription() const
 //member functions
 std::string Event::MakeEventString()
 {
-  return this->GetEventTimestamp() + " " + this->GetEventCategory() + " - Matt_daemon : " + this->GetEventDescription() + "\n";
+  std::string res = this->GetEventTimestamp() + " " + this->GetEventCategory() + " - Matt_daemon : " + this->GetEventDescription();
+  if (res.back() != '\n')
+    res.append("\n");
+  return  res;
 }
