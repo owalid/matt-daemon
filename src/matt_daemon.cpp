@@ -51,7 +51,6 @@ int main(int argc, char *argv[])
   int len_of_received_datas;
   char buffer[4096];
   int fd_lockfile = -1;
-  int FAKE_SIGNAL = 0;
 
   try
   {
