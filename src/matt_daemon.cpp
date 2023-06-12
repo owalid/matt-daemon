@@ -3,6 +3,10 @@
 #include "utils.hpp"
 #include "server.hpp"
 
+int SIGNALS[] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGBUS, SIGFPE, SIGKILL, SIGUSR1, SIGSEGV, SIGUSR2, SIGPIPE, SIGALRM, SIGTERM, SIGCHLD, SIGCONT, SIGSTOP, SIGTSTP, SIGTTIN, SIGTTOU, SIGURG, SIGXCPU, SIGXFSZ, SIGVTALRM, SIGPROF, SIGWINCH, SIGIO, SIGSYS };
+
+static TintinReporter logger;
+
 void CheckPid(pid_t pid)
 {
   if (pid < 0)
@@ -34,9 +38,12 @@ void Daemonize(TintinReporter &logger)
   logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(serverStartedPid), std::to_string(getpid()));
 }
 
+void SignalHandler(int signum) {
+  logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(signalHandler), "");
+}
+
 int main(int argc, char *argv[])
 {
-  TintinReporter logger;
   Server srv;
   bool server_launched = false;
   char remote_ip[INET6_ADDRSTRLEN];
@@ -60,6 +67,10 @@ int main(int argc, char *argv[])
     fd_lockfile = CreateLockFile(logger);
     srv.InitServer();
     logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(serverCreated), "");
+
+    for (int i = -1; i < sizeof(SIGNALS)/sizeof(SIGNALS[0]); i++)
+      signal(SIGNALS[i], SignalHandler);
+
     for (;;)
     {
       srv.SetReadFd(srv.GetMasterFd());
