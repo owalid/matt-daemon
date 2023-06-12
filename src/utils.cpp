@@ -1,4 +1,5 @@
 #include "utils.hpp"
+#include "matt_daemon.hpp"
 
 int CreateLockFile(TintinReporter &logger)
 {
@@ -34,4 +35,13 @@ void ReleaseLockFile(TintinReporter &logger, int fd_lock)
     exit(EXIT_FAILURE);
   }
   std::remove(LOCKFILE_PATH);
+}
+
+
+void CloseLockFile(TintinReporter &logger, int fd_lock)
+{
+  if (fd_lock == -1)
+    return;
+  if (close(fd_lock) == 0)
+    std::remove(LOCKFILE_PATH);
 }

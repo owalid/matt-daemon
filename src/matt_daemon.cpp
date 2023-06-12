@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
                 close(fd);
                 memset(&buffer, 0, sizeof(buffer));  
                 FD_CLR(fd, &srv.master_fd_);
-                srv.SetNumberOfConnectedCli(srv.GetNumberOfConnectedCli() - 1);
+                CloseLockFile(logger, fd_lockfile);
                 exit(0);
               }
               else
