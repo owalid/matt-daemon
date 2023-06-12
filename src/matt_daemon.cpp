@@ -115,11 +115,22 @@ int main(int argc, char *argv[])
             }
             else
             {
-              logger.MakeNewEvent(logger.GetCategoryFromEnum(log), logger.GetEventFromEnum(userRequest), buffer);
-              // Ici on devra traiter les données.
-              //clear du buffer.
-              memset(&buffer, 0, sizeof(buffer));
+              if (strcmp(buffer, "quit\n") == 0)
+              {
+                logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(programQuit), "");
+                close(fd);
+                memset(&buffer, 0, sizeof(buffer));  
+                FD_CLR(fd, &srv.master_fd_);
+                srv.SetNumberOfConnectedCli(srv.GetNumberOfConnectedCli() - 1);
+                exit(0);
+              }
+              else
+              {
+                logger.MakeNewEvent(logger.GetCategoryFromEnum(log), logger.GetEventFromEnum(userInput), buffer);
+              }
             }
+            // clear du buffer.
+            memset(&buffer, 0, sizeof(buffer));
           }
         }
       }
