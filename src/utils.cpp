@@ -38,7 +38,7 @@ void ReleaseLockFile(TintinReporter &logger, int fd_lock)
 }
 
 
-void CloseLockFile(TintinReporter &logger, int fd_lock)
+void CloseLockFile(int fd_lock)
 {
   if (fd_lock == -1)
     return;
