@@ -1,5 +1,4 @@
 #include "utils.hpp"
-#include "matt_daemon.hpp"
 
 int CreateLockFile(TintinReporter &logger)
 {

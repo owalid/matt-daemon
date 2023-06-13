@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-              if (strcmp(buffer, "quit\n") == 0)
+              if (strcmp(buffer, "quit\n") == 0 || strcmp(buffer, "quit\r\n") == 0 || strcmp(buffer, "quit") == 0)
               {
                 logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(programQuit), "");
                 close(fd);
