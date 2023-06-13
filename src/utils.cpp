@@ -36,12 +36,3 @@ void ReleaseLockFile(TintinReporter &logger, int fd_lock)
   }
   std::remove(LOCKFILE_PATH);
 }
-
-
-void CloseLockFile(int fd_lock)
-{
-  if (fd_lock == -1)
-    return;
-  if (close(fd_lock) == 0)
-    std::remove(LOCKFILE_PATH);
-}

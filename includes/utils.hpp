@@ -7,6 +7,5 @@
 
 int CreateLockFile(TintinReporter &logger);
 void ReleaseLockFile(TintinReporter &logger, int fd_lock);
-void CloseLockFile(int fd_lock);
 
 #endif
