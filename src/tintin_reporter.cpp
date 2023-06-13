@@ -114,7 +114,7 @@ std::string TintinReporter::GetEventFromEnum(const EventEnum &ev)
       return "Start.";
       break;
     case programQuit:
-      return "Quit.";
+      return "Quitting.";
     case serverCreated:
       return "Server created";
       break;
