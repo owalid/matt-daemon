@@ -1,0 +1,163 @@
+@import 'core/_reset';
+@import 'core/_base';
+@import 'core/_flex';
+@import url('https://fonts.googleapis.com/css2?family=Abel&display=swap');
+
+body {
+  font-family: 'Abel', sans-serif;
+  overflow: hidden;
+}
+
+
+a, p {
+  font-family: 'Abel', sans-serif;
+}
+
+.main-container {
+  padding: 0px 100px 100px 100px;
+  display: flex;
+  flex-direction: column;
+
+  .head-line {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 15px;
+    margin-top: 15px;
+    font-size: 27px;
+    font-weight: 600;
+    color: #000000;
+  }
+
+  .desc {
+    margin-bottom: 15px;
+    margin-top: 15px;
+    font-size: 16px;
+    font-weight: 400;
+    color: #000000;
+
+    span {
+      font-weight: 700;
+    }
+  }
+
+  .write-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    .write-content-textarea {
+      width: 60%;
+      height: 200px;
+      border: 1px solid #000000;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      font-weight: 400;
+      color: #000000;
+      resize: none;
+    }
+
+    .write-content-btn {
+      width: 20%;
+      height: 40px;
+      border: 1px solid #000000;
+      border-radius: 5px;
+      padding: 0px 15px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      font-weight: 400;
+      color: #000000;
+      background-color: #ffffff;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #000000;
+        color: #ffffff;
+      }
+    }
+
+    .write-content-feedback {
+      align-self: flex-start;
+      padding-left: 20%;
+      margin-bottom: 10px;
+      font-size: 13px;
+      font-weight: 300;
+
+      &.error {
+        color: #bb0101;
+      }
+      &.success {
+        color: #00bb00;
+      }
+    }
+  }
+
+  .command-list {
+    margin-top: 15px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    font-weight: 400;
+    color: #000000;
+
+    .command-list-usage {
+      font-size: 12px;
+      font-weight: 200;
+      margin-bottom: 15px;
+      color: #000000;
+      background-color: #ffffff;
+    }
+
+    .command-list-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: #000000;
+      background-color: #ffffff;
+    }
+
+    .command-list-item {
+      width: 60%;
+      font-size: 16px;
+      font-weight: 400;
+      margin: 0;
+      color: #000000;
+      background-color: #ffffff;
+      cursor: pointer;
+
+      span {
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+
+@media (max-width: 1200px) {
+  .main-container {
+    padding: 0px 50px 50px 50px;  
+  }
+}
+
+
+@media (max-width: 768px) {
+  .main-container {
+    padding: 0px 10px 10px 10px;  
+  }
+}
+
+@media (max-width: 576px) {
+  .main-container {
+    padding: 0px 5px 5px 5px;  
+  }
+}
+
+@media (max-width: 320px) {
+  .main-container {
+    padding: 0px 5px 5px 5px;  
+  }
+}

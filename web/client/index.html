@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" lang="sass" href="src/scss/main.scss"/>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Matt daemon</title>
+  </head>
+  <body>
+    <div id="app">
+      <div class="main-container">
+        <h1 class="head-line">Welcome to Matt-Daemon</h1>
+        <p class="desc"><span>Description: </span>Matt-Daemon is a simple daemon write in C++, You can send command or text input to the daemon and it will interpret it.</p>
+        <div class="command-list">
+          <h2 class="command-list-title">Commands available:</h2>
+          <p class="command-list-usage">Tips: You can click on the command it will be automatically write in the textarea.</p>
+          <p class="command-list-item"><span>clear: </span>This command is used to clear the log file.</p>
+          <p class="command-list-item"><span>quit: </span>This command is used to quit the daemon.</p>
+        </div>
+        <div class="write-content">
+          <textarea class="write-content-textarea" id="content" placeholder="Write your content to send to daemon here..."></textarea>
+          <p class="write-content-feedback" id="feedback-msg"></p>
+          <button class="write-content-btn" id="send">Send</button>
+        </div>
+      </div>
+    </div>
+    <script src="src/js/main.js"></script>
+  </body>
+</html>
