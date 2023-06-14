@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
       std::string s(argv[2]);
 
       number_of_max_client = ReturnDigit(s);
-      if ( number_of_max_client == -1)
+      if (number_of_max_client == -1)
         print_error("Usage : ./Matt_daemon [-c/--client MAX_ACCEPTED_CONN]. 1 <= MAX_ACCEPTED_CONN <= 100.", EXIT_FAILURE);
     }
     else
@@ -109,6 +109,11 @@ int main(int argc, char *argv[])
                 FD_CLR(fd, &srv.master_fd_);
                 ReleaseLockFile(logger, fd_lockfile);
                 exit(0);
+              }
+              else if (strcmp(buffer, "clear\n") == 0 || strcmp(buffer, "clear\r\n") == 0 || strcmp(buffer, "clear") == 0)
+              {
+                logger.MakeNewEvent(logger.GetCategoryFromEnum(log), logger.GetEventFromEnum(userRequest), buffer_string);
+                logger.ClearLogFile();
               }
               else
               {

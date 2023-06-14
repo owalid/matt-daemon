@@ -39,3 +39,7 @@ docker_config
 
 #vscode
 .vscode/*
+
+
+.pyc
+__pycache__/

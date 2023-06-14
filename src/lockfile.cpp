@@ -4,6 +4,7 @@ int CreateLockFile(TintinReporter &logger)
 {
   int fd_lock = open(LOCKFILE_PATH, O_RDWR | O_CREAT, 0600);
 
+  std::cout << "fd_lock = " << fd_lock << std::endl;
   if (fd_lock == -1)
   {
     std::cerr << "Unable to create or read the lock file. The program will exit." << std::endl;

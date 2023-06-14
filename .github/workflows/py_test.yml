@@ -1,0 +1,15 @@
+name: Python tests
+
+on:
+  workflow_run:
+    workflows: ["Make checker"]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: make test
+      run: sudo make test

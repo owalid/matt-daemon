@@ -28,6 +28,9 @@ clean:
 fclean: clean
 	rm $(NAME)
 
+test: 
+	python3 test/main.py
+
 re: fclean all
 
-.PHONY: clean re all fclean
+.PHONY: clean re all fclean test
