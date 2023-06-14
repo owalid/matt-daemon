@@ -5,9 +5,7 @@ on: ['push']
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      options: --user root
     steps:
     - uses: actions/checkout@v3
     - name: make test
-      run: make test
+      run: sudo make test
