@@ -41,9 +41,9 @@ def print_info(info_msg):
     print(Fore.BLUE, f"[INFO] {info_msg}", Style.RESET_ALL)
 
 def quit_daemon():
-    cmd = "./send_event.sh quit"
+    cmd = "./send_command.sh quit"
     subprocess.run(cmd.split(' '))
 
 def clear_log():
-    cmd = "./send_event.sh clear"
+    cmd = "./send_command.sh clear"
     subprocess.run(cmd.split(' '))
