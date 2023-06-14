@@ -1,11 +1,8 @@
 #ifndef UTILS_HPP
 # define UTILS_HPP
 
-#include <sys/file.h>
+#include <string>
 
-#include "tintin_reporter.hpp"
-
-int CreateLockFile(TintinReporter &logger);
-void ReleaseLockFile(TintinReporter &logger, int fd_lock);
+int ReturnDigit(const std::string &s);
 
 #endif

@@ -1,76 +1,58 @@
 #include "matt_daemon.hpp"
-#include "tintin_reporter.hpp"
-#include "utils.hpp"
-#include "server.hpp"
 
 int SIGNALS[] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGBUS, SIGFPE, SIGKILL, SIGUSR1, SIGSEGV, SIGUSR2, SIGPIPE, SIGALRM, SIGTERM, SIGCHLD, SIGCONT, SIGSTOP, SIGTSTP, SIGTTIN, SIGTTOU, SIGURG, SIGXCPU, SIGXFSZ, SIGVTALRM, SIGPROF, SIGWINCH, SIGIO, SIGSYS };
 
 static TintinReporter logger;
 
-void CheckPid(pid_t pid)
+void SignalHandler(int signum)
 {
-  if (pid < 0)
-  {
-    exit(EXIT_FAILURE);
-  }
-  if (pid > 0)
-    exit(EXIT_SUCCESS);
-}
-
-void Daemonize(TintinReporter &logger)
-{
-  pid_t pid, sid;
-
-  logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(daemonModeStarted), "");
-  pid = fork(); // Parent process will terminated, the child process now runs in the background.
-  CheckPid(pid);
-  sid = setsid(); // Create a new session.
-  if (sid < 0)
-    exit(EXIT_FAILURE);
-
-  pid = fork(); // Fork again to ensure that the daemon never reacquires a controlling terminal. (PID != SID)
-  CheckPid(pid);
-
-  // Close all open file descriptors
-  close(STDIN_FILENO);
-  close(STDOUT_FILENO);
-  close(STDERR_FILENO);
-  logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(serverStartedPid), std::to_string(getpid()));
-}
-
-void SignalHandler(int signum) {
   logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(signalHandler), "");
 }
 
 int main(int argc, char *argv[])
 {
   Server srv;
-  bool server_launched = false;
   char remote_ip[INET6_ADDRSTRLEN];
+  char buffer[BUFFER_LEN];
   int new_fd;
-  int len_of_received_datas;
-  char buffer[4096];
+  int len_of_received_datas = 0;
   int fd_lockfile = -1;
+  int number_of_max_client = 3;
+  size_t client_id = 1;
+  std::map<int, int> map_of_client_ids;
+  bool server_launched = false;
 
+  // check if the user is root
+  if (getuid() != 0)
+    print_error("You must be root to run this program.", EXIT_FAILURE);
+  if (argc != 3 && argc != 1)
+    print_error("Usage : ./Matt_daemon [-c/--client MAX_ACCEPTED_CONN]. 1 <= MAX_ACCEPTED_CONN <= 100.", EXIT_FAILURE);
+  if (argc == 3)
+  {
+    if (strcmp(argv[1], "--client") == 0 ||  strcmp(argv[1], "-c") == 0)
+    {
+      std::string s(argv[2]);
+
+      number_of_max_client = ReturnDigit(s);
+      if ( number_of_max_client == -1)
+        print_error("Usage : ./Matt_daemon [-c/--client MAX_ACCEPTED_CONN]. 1 <= MAX_ACCEPTED_CONN <= 100.", EXIT_FAILURE);
+    }
+    else
+      print_error("Usage : ./Matt_daemon [-c/--client MAX_ACCEPTED_CONN]. 1 <= MAX_ACCEPTED_CONN <= 100.", EXIT_FAILURE);
+  }
   try
   {
-    // check if the user is root
-    if (getuid() != 0)
-    {
-      std::cout << "You must be root to run this program" << '\n';
-      logger.MakeNewEvent(logger.GetCategoryFromEnum(error), logger.GetEventFromEnum(errorNonRootUser), "");
-      logger.MakeNewEvent(logger.GetCategoryFromEnum(error), logger.GetEventFromEnum(programQuit), \
-        "Exit : " + std::to_string(EXIT_FAILURE));
-      exit(EXIT_FAILURE);
-    }
+    logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(programStart), "");
     Daemonize(logger);
     fd_lockfile = CreateLockFile(logger);
     srv.InitServer();
+    srv.SetNumberOfMaxConn(number_of_max_client);
     logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(serverCreated), "");
 
     for (int i = -1; i < sizeof(SIGNALS)/sizeof(SIGNALS[0]); i++)
       signal(SIGNALS[i], SignalHandler);
 
+    memset(&buffer, 0, BUFFER_LEN);
     for (;;)
     {
       srv.SetReadFd(srv.GetMasterFd());
@@ -81,6 +63,7 @@ int main(int argc, char *argv[])
         //connexion
         if (FD_ISSET(fd, &srv.read_fd_))
         {
+          std::string buffer_string;
           //nouvelle connexion
           if (fd == srv.GetListenerFd())
           {
@@ -96,41 +79,45 @@ int main(int argc, char *argv[])
             FD_SET(new_fd, &srv.master_fd_);
             if (new_fd > srv.GetMaxFd())
               srv.SetMaxFd(new_fd);
+            map_of_client_ids.insert(std::pair<int,size_t>(new_fd, client_id++));
+            buffer_string.append(inet_ntop(srv.GetClientAddr().ss_family, srv.GetInAddr(), remote_ip , INET6_ADDRSTRLEN));
+            buffer_string.append(" [CLIENT_ID " + std::to_string(map_of_client_ids[new_fd]) + "].");
             logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(userConnection), \
-            inet_ntop(srv.GetClientAddr().ss_family, srv.GetInAddr(), remote_ip , INET6_ADDRSTRLEN));
+            buffer_string);
             srv.SetNumberOfConnectedCli(srv.GetNumberOfConnectedCli() + 1);
           }
           else // on reçoit des données.
           {
-            len_of_received_datas = recv(fd, buffer, sizeof(buffer), 0);
+            len_of_received_datas = recv(fd, buffer, BUFFER_LEN - 1, 0);
             if (len_of_received_datas <= 0)
             {
-              if (len_of_received_datas == 0)
-              {
-                logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(connectionClosed), "");
-                close(fd);
-                FD_CLR(fd, &srv.master_fd_);
-              }
+              buffer_string.append(std::to_string(map_of_client_ids[fd]) + "].");
+              logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(connectionClosed), buffer_string);
+              close(fd);
+              FD_CLR(fd, &srv.master_fd_);
               srv.SetNumberOfConnectedCli(srv.GetNumberOfConnectedCli() - 1);
             }
             else
             {
               if (strcmp(buffer, "quit\n") == 0 || strcmp(buffer, "quit\r\n") == 0 || strcmp(buffer, "quit") == 0)
               {
+                buffer_string.append(std::to_string(map_of_client_ids[fd]) + "] : " + buffer);
+                logger.MakeNewEvent(logger.GetCategoryFromEnum(log), logger.GetEventFromEnum(userRequest), buffer_string);
                 logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(programQuit), "");
                 close(fd);
-                memset(&buffer, 0, sizeof(buffer));  
+                memset(&buffer, 0, sizeof(buffer));
                 FD_CLR(fd, &srv.master_fd_);
                 ReleaseLockFile(logger, fd_lockfile);
                 exit(0);
               }
               else
               {
-                logger.MakeNewEvent(logger.GetCategoryFromEnum(log), logger.GetEventFromEnum(userInput), buffer);
+                buffer_string.append(std::to_string(map_of_client_ids[fd]) + "] : " + buffer);
+                logger.MakeNewEvent(logger.GetCategoryFromEnum(log), logger.GetEventFromEnum(userInput), buffer_string);
               }
             }
-            // clear du buffer.
-            memset(&buffer, 0, sizeof(buffer));
+            buffer_string.clear();
+            memset(&buffer, 0, BUFFER_LEN);
           }
         }
       }

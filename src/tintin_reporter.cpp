@@ -1,10 +1,7 @@
 #include "tintin_reporter.hpp"
 
 // Constructors
-TintinReporter::TintinReporter()
-{
-  this->MakeNewEvent(this->GetCategoryFromEnum(info), this->GetEventFromEnum(programStart), "");
-}
+TintinReporter::TintinReporter() {}
 
 TintinReporter::TintinReporter(const TintinReporter &copy)
 {
@@ -34,9 +31,9 @@ std::vector<Event> TintinReporter::getEventList() const
  * @param eventValue
  * @param additionalValue
  */
-void TintinReporter::MakeNewEvent(std::string cat, std::string eventValue, std::string additionalValue = "")
+void TintinReporter::MakeNewEvent(const std::string &cat, const std::string &eventValue, const std::string &additionalValue)
 {
-  Event new_event(CreateTimestamp(), cat, eventValue.append(additionalValue));
+  Event new_event(CreateTimestamp(), cat, eventValue + additionalValue);
 
   this->AddEventToList(new_event);
   this->AddEventToLogFile(new_event);
@@ -140,13 +137,13 @@ std::string TintinReporter::GetEventFromEnum(const EventEnum &ev)
       return "A new user is connected from : ";
       break;
     case userInput:
-      return "User input : ";
+      return "Input from [CLIENT_ID ";
       break;
     case userRequest:
-      return "Request : ";
+      return "Request from [CLIENT_ID ";
       break;
     case connectionClosed:
-      return "A connection has been closed.";
+      return "Connection closed from [CLIENT_ID ";
       break;
     default:
       return "Unknown event.";
