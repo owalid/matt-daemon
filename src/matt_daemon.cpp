@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
   try
   {
     logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(programStart), "");
-    // Daemonize(logger);
+    Daemonize(logger);
     fd_lockfile = CreateLockFile(logger);
     srv.InitServer();
     srv.SetNumberOfMaxConn(number_of_max_client);
