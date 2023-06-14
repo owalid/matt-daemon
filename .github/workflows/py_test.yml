@@ -1,6 +1,10 @@
 name: Python tests
 
-on: ['push']
+on:
+  workflow_run:
+    workflows: ["Make checker"]
+    types:
+      - completed
 
 jobs:
   build:
