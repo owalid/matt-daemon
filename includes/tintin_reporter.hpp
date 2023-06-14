@@ -32,6 +32,7 @@ class TintinReporter
 
     // fonctions membres
     void MakeNewEvent(const std::string &cat, const std::string &eventValue, const std::string &additionalValue);
+    void ClearLogFile();
     std::string GetCategoryFromEnum(const CategoryEnum &catEnum);
     std::string GetEventFromEnum(const EventEnum &eventEnum);
   private:

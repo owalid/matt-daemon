@@ -175,3 +175,16 @@ std::string TintinReporter::GetCategoryFromEnum(const CategoryEnum &cat)
       break;
   }
 }
+
+/**
+ * @brief This function will clear the log file.
+ * 
+ * @return void
+*/
+void TintinReporter::ClearLogFile()
+{
+  std::ofstream logfile;
+  logfile.open(LOG_PATH, std::ofstream::out | std::ofstream::trunc);
+  if (logfile.is_open())
+    logfile.close();
+}
