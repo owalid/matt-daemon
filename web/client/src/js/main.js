@@ -3,11 +3,10 @@ let timeout = false
 
 const display_feedback = (type, msg) => {
   const feedback = document.getElementById("feedback-msg")
-  feedback.style.display = "block"
-  feedback.classList.add(type)
-  feedback.textContent = msg
-
   if (!timeout) {
+    feedback.style.display = "block"
+    feedback.classList.add(type)
+    feedback.textContent = msg
     timeout = setTimeout(() => {
       feedback.style.display = "none"
       feedback.textContent = ""
