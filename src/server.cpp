@@ -105,7 +105,6 @@ void Server::InitServer()
   hints.ai_family = AF_UNSPEC; //on accepte ip4 ou ip6
   hints.ai_socktype = SOCK_STREAM; //tcp
 // AI_PASSIVE : permet d'écouter sur toutes les interface
-// AI_ADDRCONFIG : permet d'écouter ip4 si serveur en ip4 et idem pour ip6.
   hints.ai_flags = AI_PASSIVE;
   err = getaddrinfo(NULL, PORT, &hints, &ai);//création d'une liste d'adresses de sockets.
   if (err != 0)

@@ -31,7 +31,7 @@ class TintinReporter
     std::vector<Event> getEventList() const;
 
     // fonctions membres
-    void MakeNewEvent(std::string cat, std::string eventValue, std::string additionalValue);
+    void MakeNewEvent(const std::string &cat, const std::string &eventValue, const std::string &additionalValue);
     std::string GetCategoryFromEnum(const CategoryEnum &catEnum);
     std::string GetEventFromEnum(const EventEnum &eventEnum);
   private:

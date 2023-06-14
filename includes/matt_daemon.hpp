@@ -1,21 +1,16 @@
 #ifndef MATT_DAEMON_HPP
 # define MATT_DAEMON_HPP
 
-// Global includes libraries
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
-
-// For daemonize
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <syslog.h>
-
-// For signal handler
 #include <csignal>
+
+#include "tintin_reporter.hpp"
+#include "server.hpp"
+#include "daemonize.hpp"
+#include "lockfile.hpp"
+#include "utils.hpp"
+#include "errors.hpp"
 
 #endif
