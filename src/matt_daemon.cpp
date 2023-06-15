@@ -42,9 +42,10 @@ int main(int argc, char *argv[])
   }
   try
   {
+
     logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(programStart), "");
-    Daemonize(logger);
     fd_lockfile = CreateLockFile(logger);
+    Daemonize(logger);
     srv.InitServer();
     srv.SetNumberOfMaxConn(number_of_max_client);
     logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(serverCreated), "");
@@ -131,6 +132,7 @@ int main(int argc, char *argv[])
   catch (const std::runtime_error &e)
   {
     std::cerr << e.what() << std::endl;
+    logger.MakeNewEvent(logger.GetCategoryFromEnum(error), logger.GetEventFromEnum(programQuit), " Hard failure : " + std::string(e.what()));
     ReleaseLockFile(logger, fd_lockfile);
     exit(EXIT_FAILURE);
   }
