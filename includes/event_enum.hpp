@@ -14,6 +14,8 @@ enum EventEnum{
     userConnection,
     userInput,
     userRequest,
+    archiveCreated,
+    errorArchive,
     connectionClosed
 };
 

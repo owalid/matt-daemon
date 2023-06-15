@@ -97,6 +97,32 @@ std::string TintinReporter::CreateTimestamp()
   return time_string;
 }
 
+std::string TintinReporter::CreateTimestampForNameFile()
+{
+  auto time = std::chrono::system_clock::now();
+  std::time_t timeInSecond = std::chrono::system_clock::to_time_t(time);
+  std::tm *timeStruct = std::localtime(&timeInSecond);
+  std::string time_string;
+
+  if (timeStruct->tm_mday < 10)
+    time_string.append("0");
+  time_string.append(std::to_string(timeStruct->tm_mday) + "_");
+  if (timeStruct->tm_mon < 10)
+    time_string.append("0");
+  time_string.append(std::to_string(timeStruct->tm_mon + 1) + "_");
+  time_string.append(std::to_string(timeStruct->tm_year + 1900) + "_");
+  if (timeStruct->tm_hour < 10)
+    time_string.append("0");
+  time_string.append(std::to_string(timeStruct->tm_hour) + "-");
+  if (timeStruct->tm_min < 10)
+    time_string.append("0");
+  time_string.append(std::to_string(timeStruct->tm_min) + "-");
+  if (timeStruct->tm_sec < 10)
+    time_string.append("0");
+  time_string.append(std::to_string(timeStruct->tm_sec));
+  return time_string;
+}
+
 /**
  * @brief This function return the string corresponding to the event enum.
  *
@@ -142,6 +168,12 @@ std::string TintinReporter::GetEventFromEnum(const EventEnum &ev)
     case userRequest:
       return "Request from [CLIENT_ID ";
       break;
+    case archiveCreated:
+      return "Archive created : ";
+      break;
+    case errorArchive:
+      return "The archive could not be created.";
+      break;
     case connectionClosed:
       return "Connection closed from [CLIENT_ID ";
       break;
@@ -178,7 +210,7 @@ std::string TintinReporter::GetCategoryFromEnum(const CategoryEnum &cat)
 
 /**
  * @brief This function will clear the log file.
- * 
+ *
  * @return void
 */
 void TintinReporter::ClearLogFile()
@@ -187,4 +219,17 @@ void TintinReporter::ClearLogFile()
   logfile.open(LOG_PATH, std::ofstream::out | std::ofstream::trunc);
   if (logfile.is_open())
     logfile.close();
+}
+
+void TintinReporter::MakeArchive()
+{
+  std::string path_name(LOG_DIRECTORY);
+  path_name.append("/" + this->CreateTimestampForNameFile() + "-matt_daemon_log.tar.gz");
+  std::string full_command("tar -czvf " + path_name + " " + LOG_PATH);
+  std::system(full_command.c_str());
+
+  if (std::filesystem::exists(path_name) == true)
+    this->MakeNewEvent(this->GetCategoryFromEnum(info), this->GetEventFromEnum(archiveCreated), path_name);
+  else
+    this->MakeNewEvent(this->GetCategoryFromEnum(error), this->GetEventFromEnum(errorArchive), "");;
 }

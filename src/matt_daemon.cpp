@@ -113,8 +113,15 @@ int main(int argc, char *argv[])
               }
               else if (strcmp(buffer, "clear\n") == 0 || strcmp(buffer, "clear\r\n") == 0 || strcmp(buffer, "clear") == 0)
               {
+                buffer_string.append(std::to_string(map_of_client_ids[fd]) + "] : " + buffer);
                 logger.MakeNewEvent(logger.GetCategoryFromEnum(log), logger.GetEventFromEnum(userRequest), buffer_string);
                 logger.ClearLogFile();
+              }
+              else if (strcmp(buffer, "archive\n") == 0 || strcmp(buffer, "archive\r\n") == 0 || strcmp(buffer, "archive") == 0)
+              {
+                buffer_string.append(std::to_string(map_of_client_ids[fd]) + "] : " + buffer);
+                logger.MakeNewEvent(logger.GetCategoryFromEnum(log), logger.GetEventFromEnum(userRequest), buffer_string);
+                logger.MakeArchive();
               }
               else
               {
