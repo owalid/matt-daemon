@@ -1,12 +1,35 @@
 #include "matt_daemon.hpp"
 
 int SIGNALS[] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGBUS, SIGFPE, SIGKILL, SIGUSR1, SIGSEGV, SIGUSR2, SIGPIPE, SIGALRM, SIGTERM, SIGCHLD, SIGCONT, SIGSTOP, SIGTSTP, SIGTTIN, SIGTTOU, SIGURG, SIGXCPU, SIGXFSZ, SIGVTALRM, SIGPROF, SIGWINCH, SIGIO, SIGSYS };
-
 static TintinReporter logger;
 
 void SignalHandler(int signum)
 {
   logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(signalHandler), "");
+}
+
+void ValidateArgs(int argc, char *argv[], int have_args[])
+{
+  for (int i = 1; i < argc; i++)
+  {
+    if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
+    {
+      have_args[0] = i;
+      return;
+    }
+    if (strcmp(argv[i], "--client") == 0 || strcmp(argv[i], "-c") == 0)
+    {
+      if (have_args[0] != -1)
+        print_error(USAGE, EXIT_FAILURE);
+      have_args[1] = i;
+    }
+    else if (strcmp(argv[i], "--key") == 0 || strcmp(argv[i], "-k") == 0)
+    {
+      if (have_args[1] != -1)
+        print_error(USAGE, EXIT_FAILURE);
+      have_args[2] = i;
+    }
+  }
 }
 
 int main(int argc, char *argv[])
@@ -25,21 +48,42 @@ int main(int argc, char *argv[])
   // check if the user is root
   if (getuid() != 0)
     print_error("You must be root to run this program.", EXIT_FAILURE);
-  if (argc != 3 && argc != 1)
-    print_error("Usage : ./Matt_daemon [-c/--client MAX_ACCEPTED_CONN]. 1 <= MAX_ACCEPTED_CONN <= 100.", EXIT_FAILURE);
-  if (argc == 3)
+  if (argc > 4 && argc != 1)
+    print_error(USAGE, EXIT_FAILURE);
+  if (argc >= 2)
   {
-    if (strcmp(argv[1], "--client") == 0 ||  strcmp(argv[1], "-c") == 0)
-    {
-      std::string s(argv[2]);
+    int have_args[] = {-1, -1, -1};
+    ValidateArgs(argc, argv, have_args);
 
+    if (have_args[0] > 0)
+    {
+      std::cout << USAGE << std::endl;
+      exit(EXIT_SUCCESS);
+    }
+    else if (have_args[1] > 0)
+    {
+      std::string s(argv[have_args[1]+1]);
       number_of_max_client = ReturnDigit(s);
       if (number_of_max_client == -1)
-        print_error("Usage : ./Matt_daemon [-c/--client MAX_ACCEPTED_CONN]. 1 <= MAX_ACCEPTED_CONN <= 100.", EXIT_FAILURE);
+        print_error(USAGE, EXIT_FAILURE);
+    }
+    else if (have_args[2] > 0)
+    {
+      try
+      {
+        AesEncrypt aes(argv[have_args[2]+1]);
+      }
+      catch (const std::runtime_error &e)
+      {
+        std::cerr << e.what() << std::endl;
+        exit(EXIT_FAILURE);
+      }
     }
     else
-      print_error("Usage : ./Matt_daemon [-c/--client MAX_ACCEPTED_CONN]. 1 <= MAX_ACCEPTED_CONN <= 100.", EXIT_FAILURE);
+      print_error(USAGE, EXIT_FAILURE);
   }
+
+  exit(EXIT_SUCCESS);
   try
   {
 
