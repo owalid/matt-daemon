@@ -35,6 +35,7 @@ void ValidateArgs(int argc, char *argv[], int have_args[])
 int main(int argc, char *argv[])
 {
   Server srv;
+  AesDecrypter aes;
   char remote_ip[INET6_ADDRSTRLEN];
   char buffer[BUFFER_LEN];
   int new_fd;
@@ -44,6 +45,7 @@ int main(int argc, char *argv[])
   size_t client_id = 1;
   std::map<int, int> map_of_client_ids;
   bool server_launched = false;
+  bool encrypt_mode = false;
 
   // check if the user is root
   if (getuid() != 0)
@@ -71,7 +73,8 @@ int main(int argc, char *argv[])
     {
       try
       {
-        AesEncrypt aes(argv[have_args[2]+1]);
+        aes.SetKey(argv[have_args[2]+1]);
+        encrypt_mode = true;
       }
       catch (const std::runtime_error &e)
       {
@@ -83,7 +86,6 @@ int main(int argc, char *argv[])
       print_error(USAGE, EXIT_FAILURE);
   }
 
-  exit(EXIT_SUCCESS);
   try
   {
 
@@ -134,6 +136,7 @@ int main(int argc, char *argv[])
           else // on reçoit des données.
           {
             len_of_received_datas = recv(fd, buffer, BUFFER_LEN - 1, 0);
+
             if (len_of_received_datas <= 0)
             {
               buffer_string.append(std::to_string(map_of_client_ids[fd]) + "].");
@@ -144,6 +147,19 @@ int main(int argc, char *argv[])
             }
             else
             {
+              if (encrypt_mode)
+              {
+                try
+                {
+                  std::string decryptedtext(aes.DecryptContent(buffer));
+                  memset(&buffer, 0, sizeof(buffer));
+                  strcpy(buffer, decryptedtext.c_str());
+                }
+                catch (const std::runtime_error &e)
+                {
+                  logger.MakeNewEvent(logger.GetCategoryFromEnum(error), logger.GetEventFromEnum(programQuit), " Hard failure : " + std::string(e.what()));
+                }
+              }
               if (strcmp(buffer, "quit\n") == 0 || strcmp(buffer, "quit\r\n") == 0 || strcmp(buffer, "quit") == 0)
               {
                 buffer_string.append(std::to_string(map_of_client_ids[fd]) + "] : " + buffer);
