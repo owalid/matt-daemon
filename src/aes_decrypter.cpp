@@ -5,7 +5,6 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 
-
 // Constructors
 AesDecrypter::AesDecrypter()
 {

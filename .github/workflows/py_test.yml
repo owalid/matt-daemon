@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: install openssl
-      run: sudo apt-get install libssl-dev
+    - name: install libcrypto
+      run: sudo apt-get install openssl
     - name: make test
       run: sudo make test
