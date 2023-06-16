@@ -24,12 +24,6 @@ AesDecrypter::AesDecrypter(std::string key_path)
 AesDecrypter::~AesDecrypter() {}
 
 
-void handleErrorsl(void)
-{
-  ERR_print_errors_fp(stderr);
-}
-
-
 void hexstr_touchar(std::string ct_raw, unsigned char *ct)
 {
   for (int i = 0; i < ct_raw.length()/2; i++)
