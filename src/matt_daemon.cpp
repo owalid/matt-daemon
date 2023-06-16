@@ -1,7 +1,6 @@
 #include "matt_daemon.hpp"
 
 int SIGNALS[] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGBUS, SIGFPE, SIGKILL, SIGUSR1, SIGSEGV, SIGUSR2, SIGPIPE, SIGALRM, SIGTERM, SIGCHLD, SIGCONT, SIGSTOP, SIGTSTP, SIGTTIN, SIGTTOU, SIGURG, SIGXCPU, SIGXFSZ, SIGVTALRM, SIGPROF, SIGWINCH, SIGIO, SIGSYS };
-
 static TintinReporter logger;
 
 void SignalHandler(int signum)
@@ -9,9 +8,34 @@ void SignalHandler(int signum)
   logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(signalHandler), "");
 }
 
+void ValidateArgs(int argc, char *argv[], int have_args[])
+{
+  for (int i = 1; i < argc; i++)
+  {
+    if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
+    {
+      have_args[0] = i;
+      return;
+    }
+    if (strcmp(argv[i], "--client") == 0 || strcmp(argv[i], "-c") == 0)
+    {
+      if (have_args[0] != -1)
+        print_error(USAGE, EXIT_FAILURE);
+      have_args[1] = i;
+    }
+    else if (strcmp(argv[i], "--key") == 0 || strcmp(argv[i], "-k") == 0)
+    {
+      if (have_args[1] != -1)
+        print_error(USAGE, EXIT_FAILURE);
+      have_args[2] = i;
+    }
+  }
+}
+
 int main(int argc, char *argv[])
 {
   Server srv;
+  AesDecrypter aes;
   char remote_ip[INET6_ADDRSTRLEN];
   char buffer[BUFFER_LEN];
   int new_fd;
@@ -21,25 +45,47 @@ int main(int argc, char *argv[])
   size_t client_id = 1;
   std::map<int, int> map_of_client_ids;
   bool server_launched = false;
+  bool encrypt_mode = false;
 
   // check if the user is root
   if (getuid() != 0)
     print_error("You must be root to run this program.", EXIT_FAILURE);
-  if (argc != 3 && argc != 1)
-    print_error("Usage : ./Matt_daemon [-c/--client MAX_ACCEPTED_CONN]. 1 <= MAX_ACCEPTED_CONN <= 100.", EXIT_FAILURE);
-  if (argc == 3)
+  if (argc > 4 && argc != 1)
+    print_error(USAGE, EXIT_FAILURE);
+  if (argc >= 2)
   {
-    if (strcmp(argv[1], "--client") == 0 ||  strcmp(argv[1], "-c") == 0)
-    {
-      std::string s(argv[2]);
+    int have_args[] = {-1, -1, -1};
+    ValidateArgs(argc, argv, have_args);
 
+    if (have_args[0] > 0)
+    {
+      std::cout << USAGE << std::endl;
+      exit(EXIT_SUCCESS);
+    }
+    else if (have_args[1] > 0)
+    {
+      std::string s(argv[have_args[1]+1]);
       number_of_max_client = ReturnDigit(s);
       if (number_of_max_client == -1)
-        print_error("Usage : ./Matt_daemon [-c/--client MAX_ACCEPTED_CONN]. 1 <= MAX_ACCEPTED_CONN <= 100.", EXIT_FAILURE);
+        print_error(USAGE, EXIT_FAILURE);
+    }
+    else if (have_args[2] > 0)
+    {
+      try
+      {
+        aes.SetKey(argv[have_args[2]+1]);
+        encrypt_mode = true;
+      }
+      catch (const std::runtime_error &e)
+      {
+        std::cerr << e.what() << std::endl;
+        exit(EXIT_FAILURE);
+      }
     }
     else
-      print_error("Usage : ./Matt_daemon [-c/--client MAX_ACCEPTED_CONN]. 1 <= MAX_ACCEPTED_CONN <= 100.", EXIT_FAILURE);
+      print_error(USAGE, EXIT_FAILURE);
   }
+
   try
   {
 
@@ -90,6 +136,7 @@ int main(int argc, char *argv[])
           else // on reçoit des données.
           {
             len_of_received_datas = recv(fd, buffer, BUFFER_LEN - 1, 0);
+
             if (len_of_received_datas <= 0)
             {
               buffer_string.append(std::to_string(map_of_client_ids[fd]) + "].");
@@ -100,6 +147,19 @@ int main(int argc, char *argv[])
             }
             else
             {
+              if (encrypt_mode)
+              {
+                try
+                {
+                  std::string decryptedtext(aes.DecryptContent(buffer));
+                  memset(&buffer, 0, sizeof(buffer));
+                  strcpy(buffer, decryptedtext.c_str());
+                }
+                catch (const std::runtime_error &e)
+                {
+                  logger.MakeNewEvent(logger.GetCategoryFromEnum(error), logger.GetEventFromEnum(programQuit), " Hard failure : " + std::string(e.what()));
+                }
+              }
               if (strcmp(buffer, "quit\n") == 0 || strcmp(buffer, "quit\r\n") == 0 || strcmp(buffer, "quit") == 0)
               {
                 buffer_string.append(std::to_string(map_of_client_ids[fd]) + "] : " + buffer);

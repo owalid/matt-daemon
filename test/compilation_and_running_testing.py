@@ -1,4 +1,4 @@
-from utils import validate_with_return_code, validate_with_fn, print_error, print_success, print_info, quit_daemon, clear_log
+from utils import validate_with_return_code, print_error, print_success, print_info, quit_daemon, clear_log
 
 '''
 This file will test the compilation, running and options of the Matt_daemon program.
@@ -22,14 +22,10 @@ def running_testing():
     
 def re_running_testing():
     location = "compilation_and_running_testing -> re_running_testing"
-    clear_log()
-    cmd = "./Matt_daemon && sleep 0.3 && cat /var/log/matt_daemon/matt_daemon.log | grep 'Cannot lock the lockfile.'"
-    res, debug = validate_with_fn(cmd, lambda x: len(x) > 0)
-    if res == True:
+    if validate_with_return_code("./Matt_daemon", 1) == True:
         print_success(location)
         return 0
     
-    print(debug)
     print_error(location)
     return 1
 

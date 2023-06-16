@@ -9,7 +9,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: gcc:11.4.0-bullseye
     steps:
     - uses: actions/checkout@v3
+    - name: install libcrypto
+      run: sudo apt-get install libcrypto++8 libcrypto++8-dbg libcrypto++-dev
     - name: make test
       run: sudo make test

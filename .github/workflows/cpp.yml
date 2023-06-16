@@ -5,6 +5,8 @@ on: ['push']
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: gcc:11.4.0-bullseye
     steps:
     - uses: actions/checkout@v3
     - name: make

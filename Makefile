@@ -1,8 +1,8 @@
 CPP = c++
 
 SRC = matt_daemon.cpp event.cpp tintin_reporter.cpp utils.cpp server.cpp errors.cpp lockfile.cpp \
-			daemonize.cpp
-CPPFLAGS = -std=c++11 -pedantic -Wall -Wextra -Werror -O2
+			daemonize.cpp aes_decrypter.cpp
+CPPFLAGS = -std=c++11 -lcrypto -pedantic -Wall -Wextra -Werror -O2
 NAME = Matt_daemon
 
 SRCDIR = ./src
