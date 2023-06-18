@@ -1,4 +1,4 @@
-from utils import validate_with_return_code, print_error, print_success, print_info, quit_daemon, clear_log
+from utils import validate_with_return_code, print_error, print_success, print_info, quit_daemon, clear_log, run_cmd, LOCK_FILE, LOG_FILE
 
 '''
 This file will test the compilation, running and options of the Matt_daemon program.
@@ -37,6 +37,7 @@ def client_options_ok():
         print_success(location)
         return 0
     print_error(location)
+    return 1
 
 def client_options_high():
     location = "compilation_and_running_testing -> client_options_high"
@@ -97,4 +98,7 @@ def compilation_and_running_testing():
     return res
 
 if __name__ == "__main__":
+    clear_log()
+    quit_daemon()
+    rm_lock_log_files()
     compilation_and_running_testing()

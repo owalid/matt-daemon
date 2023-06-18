@@ -14,8 +14,15 @@ void CheckPid(pid_t pid)
 void Daemonize(TintinReporter &logger)
 {
   pid_t pid, sid;
+  try
+  {
+    logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(daemonModeStarted), "");
+  }
+  catch (const std::runtime_error &e)
+  {
+    print_error(e.what(), EXIT_FAILURE);
+  }
 
-  logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(daemonModeStarted), "");
   pid = fork(); // Parent process will terminated, the child process now runs in the background.
   CheckPid(pid);
   sid = setsid(); // Create a new session.

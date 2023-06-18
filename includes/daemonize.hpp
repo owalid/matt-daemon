@@ -10,6 +10,7 @@
 #include <syslog.h>
 
 #include "tintin_reporter.hpp"
+#include "errors.hpp"
 
 void CheckPid(pid_t pid);
 void Daemonize(TintinReporter &logger);
