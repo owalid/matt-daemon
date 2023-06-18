@@ -31,7 +31,8 @@ def validate_with_fn(cmd, fn):
     try:
         res = subprocess.check_output(cmd, shell=True)
         return fn(res), res
-    except:
+    except subprocess.CalledProcessError as e:
+        print(e)
         return False, None
 
 def run_cmd(cmd):

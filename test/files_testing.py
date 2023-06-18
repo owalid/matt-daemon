@@ -12,8 +12,8 @@ def lock_file_exist():
     res, log = validate_with_fn(f"ls {LOCK_FILE}", lambda val: len(val) > 0)
     if res == True:
         print_success(location)
-        print(log)
         return 0
+    print(log)
     print_error(location)
     return 1
 
@@ -27,8 +27,8 @@ def delete_lock_file():
     res, log = validate_with_fn(f"sleep 0.2; cat {LOG_FILE} | grep 'Quitting. Hard failure : Unable to bind to any address.'", lambda val: len(val) > 0)
     if res == True:
         print_success(location)
-        print(log)
         return 0
+    print(log)
     print_error(location)
     return 1
 
@@ -85,6 +85,9 @@ def change_log_file_to_directory():
 
 def files_testing():
     print_info("=== files_testing ===")
+    clear_log()
+    quit_daemon()
+    rm_lock_log_files()
     res = 0
     res += lock_file_exist()
     res += delete_lock_file()
