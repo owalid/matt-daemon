@@ -89,7 +89,14 @@ int main(int argc, char *argv[])
   try
   {
 
-    logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(programStart), "");
+    try
+    {
+      logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(programStart), "");
+    }
+    catch (const std::runtime_error &e)
+    {
+      print_error(e.what(), EXIT_FAILURE);
+    }
     fd_lockfile = CreateLockFile(logger);
     Daemonize(logger);
     srv.InitServer();
