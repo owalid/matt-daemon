@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <chrono>
+#include <mutex>
 
 #include "event.hpp"
 #include "event_enum.hpp"
@@ -34,14 +35,15 @@ class TintinReporter
     void MakeNewEvent(const std::string &cat, const std::string &eventValue, const std::string &additionalValue);
     void ClearLogFile();
     void MakeArchive();
+    std::mutex GetLogMutex() const;
     std::string GetCategoryFromEnum(const CategoryEnum &catEnum);
     std::string GetEventFromEnum(const EventEnum &eventEnum);
+    std::mutex log_mutex_;
   private:
     void AddEventToList(Event &ev);
     void AddEventToLogFile(Event &ev);
     std::string CreateTimestamp();
     std::string CreateTimestampForNameFile();
-
     std::vector<Event> event_list_;
 };
 

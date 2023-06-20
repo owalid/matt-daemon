@@ -2,10 +2,104 @@
 
 int SIGNALS[] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGBUS, SIGFPE, SIGKILL, SIGUSR1, SIGSEGV, SIGUSR2, SIGPIPE, SIGALRM, SIGTERM, SIGCHLD, SIGCONT, SIGSTOP, SIGTSTP, SIGTTIN, SIGTTOU, SIGURG, SIGXCPU, SIGXFSZ, SIGVTALRM, SIGPROF, SIGWINCH, SIGIO, SIGSYS };
 static TintinReporter logger;
+int nl_socket;
+bool break_loop = false;
 
 void SignalHandler(int signum)
 {
   logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(signalHandler), "");
+}
+
+
+/* NOTE ADDITIONNELLE SUR UNE CONFUSION POSSIBLE (linux/cn_proc.h)
+ * From the user's point of view, the process
+ * ID is the thread group ID and thread ID is the internal
+ * kernel "pid". So, fields are assigned as follow:
+ *
+ *  In user space     -  In  kernel space
+ *
+ * parent process ID  =  parent->tgid
+ * parent thread  ID  =  parent->pid
+ * child  process ID  =  child->tgid
+ * child  thread  ID  =  child->pid
+ */
+void HandleProcEvent()
+{
+  struct __attribute__ ((aligned(NLMSG_ALIGNTO)))
+  {
+    struct nlmsghdr nl_hdr;
+    struct __attribute__ ((__packed__)) {
+        struct cn_msg cn_msg;
+        struct proc_event proc_ev;
+    };
+  } nlcn_msg;
+
+  logger.MakeNewEvent(logger.GetCategoryFromEnum(procConnector), logger.GetEventFromEnum(procConnectorStarted), "");
+
+  while (break_loop == false)
+  {
+    int recv_size = recv(nl_socket, &nlcn_msg, sizeof(nlcn_msg), 0);
+    if (recv_size == 0)
+    {
+      logger.MakeNewEvent(logger.GetCategoryFromEnum(procConnector), logger.GetEventFromEnum(procConnectorDisconnected), "");
+      return ;
+    }
+    if (recv_size == -1)
+      throw std::runtime_error("recv failed.");
+    switch (nlcn_msg.proc_ev.what)
+    {
+      case 0x00000000: //PROC_EVENT_NONE:
+      {
+        logger.MakeNewEvent(logger.GetCategoryFromEnum(procConnector), logger.GetEventFromEnum(procEventNone), "");
+        break;
+      }
+      case 0x00000001: //PROC_EVENT_FORK:
+      {
+        std::string ev_fork("[PARENT TID : " + std::to_string(nlcn_msg.proc_ev.event_data.fork.parent_pid) + " PID : " \
+          + std::to_string(nlcn_msg.proc_ev.event_data.fork.parent_tgid) + \
+        "][CHILD TID : " + std::to_string(nlcn_msg.proc_ev.event_data.fork.child_pid) + \
+        " PID : " + std::to_string(nlcn_msg.proc_ev.event_data.fork.child_tgid) + "]");
+        logger.MakeNewEvent(logger.GetCategoryFromEnum(procConnector), logger.GetEventFromEnum(procEventFork), ev_fork);
+        break;
+      }
+      case 0x00000002: //PROC_EVENT_EXEC:
+      {
+        std::string ev_exec("[PROCESS TID : " + std::to_string(nlcn_msg.proc_ev.event_data.exec.process_pid) + " PID : " + \
+        std::to_string(nlcn_msg.proc_ev.event_data.exec.process_tgid) + "]");
+        logger.MakeNewEvent(logger.GetCategoryFromEnum(procConnector), logger.GetEventFromEnum(procEventExec), ev_exec);
+        break;
+      }
+      case 0x00000004: //PROC_EVENT_UID:
+      {
+        std::string ev_uid("[FROM RUID :" + std::to_string(nlcn_msg.proc_ev.event_data.id.r.ruid) + \
+          " EUID : " + std::to_string(nlcn_msg.proc_ev.event_data.id.e.euid) + \
+          " TO TID : " + std::to_string(nlcn_msg.proc_ev.event_data.id.process_pid) + \
+          " PID : " + std::to_string(nlcn_msg.proc_ev.event_data.id.process_tgid) + "]");
+        logger.MakeNewEvent(logger.GetCategoryFromEnum(procConnector), logger.GetEventFromEnum(procEventUid), ev_uid);
+        break;
+      }
+      case 0x00000040: //PROC_EVENT_GID:
+      {
+        std::string ev_gid("[FROM RGID :" + std::to_string(nlcn_msg.proc_ev.event_data.id.r.rgid) + \
+          " EGID : " + std::to_string(nlcn_msg.proc_ev.event_data.id.e.egid) + \
+          " TO TID : " + std::to_string(nlcn_msg.proc_ev.event_data.id.process_pid) + \
+          " PID : " + std::to_string(nlcn_msg.proc_ev.event_data.id.process_tgid) + "]");
+        logger.MakeNewEvent(logger.GetCategoryFromEnum(procConnector), logger.GetEventFromEnum(procEventGid), ev_gid);
+        break;
+      }
+      case 0x80000000://PROC_EVENT_EXIT:
+      {
+        std::string ev_exit("[TID : " + std::to_string(nlcn_msg.proc_ev.event_data.exit.process_pid) + \
+          " PID : " + std::to_string(nlcn_msg.proc_ev.event_data.exit.process_tgid) + \
+          " EXIT CODE : " + std::to_string(nlcn_msg.proc_ev.event_data.exit.exit_code) + "]");
+        logger.MakeNewEvent(logger.GetCategoryFromEnum(procConnector), logger.GetEventFromEnum(procEventExit), ev_exit);
+        break;
+      }
+      default:
+        std::cout << "AUCUN EV" << std::endl;
+        break;
+    }
+  }
 }
 
 void ValidateArgs(int argc, char *argv[], int have_args[])
@@ -29,6 +123,10 @@ void ValidateArgs(int argc, char *argv[], int have_args[])
         print_error(USAGE, EXIT_FAILURE);
       have_args[2] = i;
     }
+    else if (strcmp(argv[i], "--procevent") == 0 || strcmp(argv[i], "-p") == 0)
+    {
+      have_args[3] = i;
+    }
   }
 }
 
@@ -46,7 +144,8 @@ int main(int argc, char *argv[])
   std::map<int, int> map_of_client_ids;
   bool server_launched = false;
   bool encrypt_mode = false;
-
+  bool proc_event_mode = false;
+  std::thread proc_event_thread;
   // check if the user is root
   if (getuid() != 0)
     print_error("You must be root to run this program.", EXIT_FAILURE);
@@ -54,7 +153,7 @@ int main(int argc, char *argv[])
     print_error(USAGE, EXIT_FAILURE);
   if (argc >= 2)
   {
-    int have_args[] = {-1, -1, -1};
+    int have_args[] = {-1, -1, -1, -1};
     ValidateArgs(argc, argv, have_args);
 
     if (have_args[0] > 0)
@@ -82,13 +181,16 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
       }
     }
+    else if (have_args[3] > 0)
+    {
+      proc_event_mode = true;
+    }
     else
       print_error(USAGE, EXIT_FAILURE);
   }
 
   try
   {
-
     try
     {
       logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(programStart), "");
@@ -107,6 +209,14 @@ int main(int argc, char *argv[])
       signal(SIGNALS[i], SignalHandler);
 
     memset(&buffer, 0, BUFFER_LEN);
+    if (proc_event_mode == true)
+    {
+      std::cout << "Proc event true" << std::endl;
+
+      nl_socket = NetlinkConnector();
+      InitEventListener(true, nl_socket);
+      proc_event_thread = std::thread(HandleProcEvent);
+    }
     for (;;)
     {
       srv.SetReadFd(srv.GetMasterFd());
@@ -207,9 +317,16 @@ int main(int argc, char *argv[])
   {
     std::cerr << e.what() << std::endl;
     logger.MakeNewEvent(logger.GetCategoryFromEnum(error), logger.GetEventFromEnum(programQuit), " Hard failure : " + std::string(e.what()));
+    break_loop = true;
+    InitEventListener(false, nl_socket);
+    close(nl_socket);
     ReleaseLockFile(logger, fd_lockfile);
     exit(EXIT_FAILURE);
   }
+  break_loop = true;
+  InitEventListener(false, nl_socket);
+  close(nl_socket);
+  proc_event_thread.join();
   ReleaseLockFile(logger, fd_lockfile);
   exit(EXIT_SUCCESS);
 }

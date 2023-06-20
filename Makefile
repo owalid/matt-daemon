@@ -1,8 +1,8 @@
 CPP = c++
 
 SRC = matt_daemon.cpp event.cpp tintin_reporter.cpp utils.cpp server.cpp errors.cpp lockfile.cpp \
-			daemonize.cpp aes_decrypter.cpp
-CPPFLAGS = -std=c++11 -lcrypto -pedantic -Wall -Wextra -Werror -O2
+			daemonize.cpp aes_decrypter.cpp proc_connector.cpp
+CPPFLAGS = -std=c++11  -pedantic -Wall -Wextra -Werror -O2
 NAME = Matt_daemon
 
 SRCDIR = ./src
@@ -14,7 +14,7 @@ DEPS = $(SRC:.cpp=.d)
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	$(CPP) $(CPPFLAGS) $(OBJS) -o $(NAME) -Iincludes
+	$(CPP) $(CPPFLAGS) $(OBJS) -o $(NAME) -Iincludes -lcrypto
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(OBJDIR)
@@ -28,7 +28,7 @@ clean:
 fclean: clean
 	rm $(NAME)
 
-test: 
+test:
 	python3 test/main.py
 
 re: fclean all

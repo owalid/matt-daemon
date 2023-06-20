@@ -51,6 +51,8 @@ void TintinReporter::AddEventToList(Event &ev)
  */
 void TintinReporter::AddEventToLogFile(Event &ev)
 {
+  std::lock_guard<std::mutex> lock(this->log_mutex_);
+
   if (std::filesystem::exists(LOG_DIRECTORY) == false)
     std::filesystem::create_directory(LOG_DIRECTORY);
   if (std::filesystem::exists(LOG_DIRECTORY) == false)
@@ -177,6 +179,30 @@ std::string TintinReporter::GetEventFromEnum(const EventEnum &ev)
     case connectionClosed:
       return "Connection closed from [CLIENT_ID ";
       break;
+    case procConnectorStarted:
+      return "Proc connector has started.";
+      break;
+    case procConnectorDisconnected:
+      return "Proc connector has been disconnected.";
+      break;
+    case procEventFork:
+      return "Fork Event : ";
+      break;
+    case procEventExec:
+      return "Exec Event : ";
+      break;
+    case procEventExit:
+      return "Exit Event : ";
+      break;
+    case procEventGid :
+      return "GID Event : ";
+      break;
+    case procEventUid :
+      return "UID Event : ";
+      break;
+    case procEventNone :
+      return "Empty or null Event.";
+      break;
     default:
       return "Unknown event.";
       break;
@@ -201,6 +227,9 @@ std::string TintinReporter::GetCategoryFromEnum(const CategoryEnum &cat)
       break;
     case error:
       return "[ ERROR ]";
+      break;
+    case procConnector:
+      return "[ PROC CONNECTOR ]";
       break;
     default:
       return "[ UNKNOWN ]";

@@ -16,7 +16,15 @@ enum EventEnum{
     userRequest,
     archiveCreated,
     errorArchive,
-    connectionClosed
+    connectionClosed,
+    procConnectorStarted,
+    procConnectorDisconnected,
+    procEventFork,
+    procEventExec,
+    procEventExit,
+    procEventUid,
+    procEventGid,
+    procEventNone
 };
 
 #endif
