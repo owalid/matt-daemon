@@ -41,10 +41,43 @@ void InitEventListener(bool enable_listener, int netlink_socket)
   nlcn_msg.cn_msg.id.val = CN_VAL_PROC;
   nlcn_msg.cn_msg.len = sizeof(enum proc_cn_mcast_op);
 
-  nlcn_msg.cn_mcast = enable_listener ? PROC_CN_MCAST_LISTEN : PROC_CN_MCAST_IGNORE;
+  nlcn_msg.cn_mcast = enable_listener == true ? PROC_CN_MCAST_LISTEN : PROC_CN_MCAST_IGNORE;
 
   if (send(netlink_socket, &nlcn_msg, sizeof(nlcn_msg), 0) == -1)
     throw std::runtime_error("Unable to subscribe to proc");
-  std::cout << "Fin de init" << std::endl;
 }
 
+std::string ReadLink(pid_t pid)
+{
+  char full_path[1024];
+  char buff[1024];
+  std::string res;
+
+  snprintf(full_path, sizeof(full_path), "/proc/%d/exe", pid);
+  size_t len = readlink(full_path, buff, sizeof(buff));
+  if (len == -1)
+    res = std::string("N/A");
+  else
+  {
+    buff[len] = '\0';
+    res = std::string(buff);
+  }
+  return res;
+}
+
+std::string CmdLine(pid_t pid)
+{
+  char full_path[1024];
+  std::string res("");
+  std::ifstream cmd_line_file;
+
+  snprintf(full_path, sizeof(full_path), "/proc/%d/cmdline", pid);
+  cmd_line_file.open(full_path);
+  if (cmd_line_file.is_open())
+  {
+    cmd_line_file >> res;
+    std::replace(res.begin(), res.end(), '\0', ' ');
+    cmd_line_file.close();
+  }
+  return res;
+}

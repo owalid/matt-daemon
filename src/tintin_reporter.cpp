@@ -170,6 +170,9 @@ std::string TintinReporter::GetEventFromEnum(const EventEnum &ev)
     case userRequest:
       return "Request from [CLIENT_ID ";
       break;
+    case userRequestRejected:
+      return "The user request is rejected : ";
+      break;
     case archiveCreated:
       return "Archive created : ";
       break;
@@ -180,19 +183,22 @@ std::string TintinReporter::GetEventFromEnum(const EventEnum &ev)
       return "Connection closed from [CLIENT_ID ";
       break;
     case procConnectorStarted:
-      return "Proc connector has started.";
+      return "Proc connector started.";
+      break;
+    case procConnectorStopped:
+      return "Proc connector stopped.";
       break;
     case procConnectorDisconnected:
-      return "Proc connector has been disconnected.";
+      return "Proc connector disconnected.";
       break;
     case procEventFork:
-      return "Fork Event : ";
+      return "FORK Event : ";
       break;
     case procEventExec:
-      return "Exec Event : ";
+      return "EXEC Event : ";
       break;
     case procEventExit:
-      return "Exit Event : ";
+      return "EXIT Event : ";
       break;
     case procEventGid :
       return "GID Event : ";
@@ -200,11 +206,26 @@ std::string TintinReporter::GetEventFromEnum(const EventEnum &ev)
     case procEventUid :
       return "UID Event : ";
       break;
+    case procEventSid:
+      return "SID Event : ";
+      break;
+    case procEventPtrace :
+      return "PTRACE Event : ";
+      break;
+    case procEventComm :
+      return "COMM Event : ";
+      break;
+    case procEventCoreDump:
+      return "COREDUMP Event : ";
+      break;
     case procEventNone :
-      return "Empty or null Event.";
+      return "EMPTY or NULL Event.";
+      break;
+    case procEventUnknown:
+      return "UNKNOWN Event.";
       break;
     default:
-      return "Unknown event.";
+      return "UNKNOWN event.";
       break;
   }
 }

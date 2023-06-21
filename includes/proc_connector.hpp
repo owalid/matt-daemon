@@ -2,6 +2,7 @@
 #define PROC_CONNECTOR_HPP
 
 #include <iostream>
+#include <algorithm>
 #include <string>
 
 #include <sys/socket.h>
@@ -20,6 +21,7 @@
 
   int NetlinkConnector();
   void InitEventListener(bool enable_listener, int netlink_socket);
-
+  std::string ReadLink(pid_t pid);
+  std::string CmdLine(pid_t pid);
 
 #endif
