@@ -14,7 +14,8 @@ DEPS = $(SRC:.cpp=.d)
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	$(CPP) $(CPPFLAGS) $(OBJS) -o $(NAME) -Iincludes -lcrypto
+	$(CPP) $(CPPFLAGS) $(OBJS) -o $(NAME) -Iincludes -lcrypto -lpthread
+
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(OBJDIR)
