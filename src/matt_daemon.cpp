@@ -183,7 +183,6 @@ int main(int argc, char *argv[])
   bool encrypt_mode = false;
   bool proc_event_mode = false;
   bool proc_event_init_launched = false;
-  bool proc_event_connector_socket_muted = false;
   std::thread proc_event_thread;
 
 
