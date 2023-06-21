@@ -391,21 +391,27 @@ int main(int argc, char *argv[])
       }
     }
   }
-  catch (const std::runtime_error &e)
+  catch (const std::exception &e)
   {
     std::cerr << e.what() << std::endl;
     logger.MakeNewEvent(logger.GetCategoryFromEnum(error), logger.GetEventFromEnum(programQuit), " Hard failure : " + std::string(e.what()));
+    if (proc_event_init_launched)
+    {
+      break_loop = true;
+      proc_event_thread.join();
+      InitEventListener(false, nl_socket);
+      close(nl_socket);
+    }
+    ReleaseLockFile(logger, fd_lockfile);
+    exit(EXIT_FAILURE);
+  }
+  if (proc_event_init_launched)
+  {
     break_loop = true;
     proc_event_thread.join();
     InitEventListener(false, nl_socket);
     close(nl_socket);
-    ReleaseLockFile(logger, fd_lockfile);
-    exit(EXIT_FAILURE);
   }
-  break_loop = true;
-  InitEventListener(false, nl_socket);
-  proc_event_thread.join();
-  close(nl_socket);
   ReleaseLockFile(logger, fd_lockfile);
   exit(EXIT_SUCCESS);
 }
