@@ -5,7 +5,8 @@ enum CategoryEnum
 {
     info,
     error,
-    log
+    log,
+    procConnector
 };
 
 #endif

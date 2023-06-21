@@ -51,6 +51,8 @@ void TintinReporter::AddEventToList(Event &ev)
  */
 void TintinReporter::AddEventToLogFile(Event &ev)
 {
+  std::lock_guard<std::mutex> lock(this->log_mutex_);
+
   if (std::filesystem::exists(LOG_DIRECTORY) == false)
     std::filesystem::create_directory(LOG_DIRECTORY);
   if (std::filesystem::exists(LOG_DIRECTORY) == false)
@@ -168,6 +170,9 @@ std::string TintinReporter::GetEventFromEnum(const EventEnum &ev)
     case userRequest:
       return "Request from [CLIENT_ID ";
       break;
+    case userRequestRejected:
+      return "The user request is rejected : ";
+      break;
     case archiveCreated:
       return "Archive created : ";
       break;
@@ -177,8 +182,50 @@ std::string TintinReporter::GetEventFromEnum(const EventEnum &ev)
     case connectionClosed:
       return "Connection closed from [CLIENT_ID ";
       break;
+    case procConnectorStarted:
+      return "Proc connector started.";
+      break;
+    case procConnectorStopped:
+      return "Proc connector stopped.";
+      break;
+    case procConnectorDisconnected:
+      return "Proc connector disconnected.";
+      break;
+    case procEventFork:
+      return "FORK Event : ";
+      break;
+    case procEventExec:
+      return "EXEC Event : ";
+      break;
+    case procEventExit:
+      return "EXIT Event : ";
+      break;
+    case procEventGid :
+      return "GID Event : ";
+      break;
+    case procEventUid :
+      return "UID Event : ";
+      break;
+    case procEventSid:
+      return "SID Event : ";
+      break;
+    case procEventPtrace :
+      return "PTRACE Event : ";
+      break;
+    case procEventComm :
+      return "COMM Event : ";
+      break;
+    case procEventCoreDump:
+      return "COREDUMP Event : ";
+      break;
+    case procEventNone :
+      return "EMPTY or NULL Event.";
+      break;
+    case procEventUnknown:
+      return "UNKNOWN Event.";
+      break;
     default:
-      return "Unknown event.";
+      return "UNKNOWN event.";
       break;
   }
 }
@@ -201,6 +248,9 @@ std::string TintinReporter::GetCategoryFromEnum(const CategoryEnum &cat)
       break;
     case error:
       return "[ ERROR ]";
+      break;
+    case procConnector:
+      return "[ PROC CONNECTOR ]";
       break;
     default:
       return "[ UNKNOWN ]";
