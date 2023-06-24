@@ -150,7 +150,7 @@ std::string TintinReporter::GetEventFromEnum(const EventEnum &ev)
       return "Started. PID : ";
       break;
     case signalHandler:
-      return "Signal handler.";
+      return "Signal handler. Signal Receveid : ";
       break;
     case errorFileLock:
       return "Cannot lock the lockfile.";
