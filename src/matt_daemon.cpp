@@ -207,7 +207,6 @@ int main(int argc, char *argv[])
     {
       std::string s(argv[have_args[1]+1]);
       number_of_max_client = ReturnDigit(s);
-      std::cout << number_of_max_client << std::endl;
       if (number_of_max_client == -1)
         print_error(USAGE, EXIT_FAILURE);
     }
