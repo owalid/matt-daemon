@@ -434,6 +434,6 @@ int main(int argc, char *argv[])
     close(client.first);
   }
   ReleaseLockFile(logger, fd_lockfile);
-  logger.MakeNewEvent(logger.GetCategoryFromEnum(error), logger.GetEventFromEnum(programQuit), "");
+  logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(programQuit), "");
   exit(EXIT_SUCCESS);
 }
