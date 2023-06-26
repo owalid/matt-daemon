@@ -3,11 +3,13 @@
 int SIGNALS[] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGBUS, SIGFPE, SIGKILL, SIGUSR1, SIGSEGV, SIGUSR2, SIGPIPE, SIGALRM, SIGTERM, SIGCHLD, SIGCONT, SIGSTOP, SIGTSTP, SIGTTIN, SIGTTOU, SIGURG, SIGXCPU, SIGXFSZ, SIGVTALRM, SIGPROF, SIGWINCH, SIGIO, SIGSYS };
 static TintinReporter logger;
 int nl_socket;
-bool break_loop = false;
+bool break_loop_thread = false;
+bool should_quit = false;
 
 void SignalHandler(int signum)
 {
-  logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(signalHandler), "");
+  logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(signalHandler), std::to_string(signum));
+  should_quit = true;
 }
 
 
@@ -36,7 +38,8 @@ void HandleProcEvent()
 
   logger.MakeNewEvent(logger.GetCategoryFromEnum(procConnector), logger.GetEventFromEnum(procConnectorStarted), "");
 
-  while (break_loop == false)
+  while (break_loop_thread == false)
+
   {
     int recv_size = recv(nl_socket, &nlcn_msg, sizeof(nlcn_msg), 0);
     if (recv_size == 0)
@@ -185,8 +188,6 @@ int main(int argc, char *argv[])
   bool proc_event_init_launched = false;
   std::thread proc_event_thread;
 
-
-
   // check if the user is root
   if (getuid() != 0)
     print_error("You must be root to run this program.", EXIT_FAILURE);
@@ -246,7 +247,7 @@ int main(int argc, char *argv[])
     srv.SetNumberOfMaxConn(number_of_max_client);
     logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(serverCreated), "");
 
-    for (int i = -1; i < sizeof(SIGNALS)/sizeof(SIGNALS[0]); i++)
+    for (int i = 0; i < sizeof(SIGNALS)/sizeof(SIGNALS[0]); i++)
       signal(SIGNALS[i], SignalHandler);
 
     memset(&buffer, 0, BUFFER_LEN);
@@ -259,7 +260,7 @@ int main(int argc, char *argv[])
       proc_event_init_launched = true;
     }
 
-    for (;;)
+    while (should_quit == false)
     {
       srv.SetReadFd(srv.GetMasterFd());
       if (select(srv.GetMaxFd() + 1, &srv.read_fd_, NULL, NULL, NULL) < 0)
@@ -295,7 +296,6 @@ int main(int argc, char *argv[])
           else // on reçoit des données.
           {
             len_of_received_datas = recv(fd, buffer, BUFFER_LEN - 1, 0);
-
             if (len_of_received_datas <= 0)
             {
               buffer_string.append(std::to_string(map_of_client_ids[fd]) + "].");
@@ -321,14 +321,24 @@ int main(int argc, char *argv[])
               }
               if (strcmp(buffer, "quit\n") == 0 || strcmp(buffer, "quit\r\n") == 0 || strcmp(buffer, "quit") == 0)
               {
+                if (proc_event_init_launched)
+                {
+                  break_loop_thread = true;
+                  proc_event_thread.join();
+                  InitEventListener(false, nl_socket);
+                  close(nl_socket);
+                }
                 buffer_string.append(std::to_string(map_of_client_ids[fd]) + "] : " + buffer);
                 logger.MakeNewEvent(logger.GetCategoryFromEnum(log), logger.GetEventFromEnum(userRequest), buffer_string);
                 logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(programQuit), "");
-                close(fd);
                 memset(&buffer, 0, sizeof(buffer));
-                FD_CLR(fd, &srv.master_fd_);
+                for (const auto &client : map_of_client_ids)
+                {
+                  FD_CLR(client.first, &srv.master_fd_);
+                  close(client.first);
+                }
                 ReleaseLockFile(logger, fd_lockfile);
-                exit(0);
+                exit(EXIT_SUCCESS);
               }
               else if (strcmp(buffer, "clear\n") == 0 || strcmp(buffer, "clear\r\n") == 0 || strcmp(buffer, "clear") == 0)
               {
@@ -354,9 +364,9 @@ int main(int argc, char *argv[])
                   proc_event_init_launched = true;
 
                 }
-                else if (proc_event_init_launched == true && break_loop == true)
+                else if (proc_event_init_launched == true && break_loop_thread == true)
                 {
-                  break_loop = false;
+                  break_loop_thread = false;
                   proc_event_thread = std::thread(HandleProcEvent);
                 }
                 else
@@ -368,9 +378,9 @@ int main(int argc, char *argv[])
               {
                 buffer_string.append(std::to_string(map_of_client_ids[fd]) + "] : " + buffer);
                 logger.MakeNewEvent(logger.GetCategoryFromEnum(log), logger.GetEventFromEnum(userRequest), buffer_string);
-                if (proc_event_init_launched == true && break_loop == false)
+                if (proc_event_init_launched == true && break_loop_thread == false)
                 {
-                  break_loop = true;
+                  break_loop_thread = true;
                   proc_event_thread.join();
                 }
                 else
@@ -397,21 +407,32 @@ int main(int argc, char *argv[])
     logger.MakeNewEvent(logger.GetCategoryFromEnum(error), logger.GetEventFromEnum(programQuit), " Hard failure : " + std::string(e.what()));
     if (proc_event_init_launched)
     {
-      break_loop = true;
+      break_loop_thread = true;
       proc_event_thread.join();
       InitEventListener(false, nl_socket);
       close(nl_socket);
+    }
+    for (const auto &client : map_of_client_ids)
+    {
+      FD_CLR(client.first, &srv.master_fd_);
+      close(client.first);
     }
     ReleaseLockFile(logger, fd_lockfile);
     exit(EXIT_FAILURE);
   }
   if (proc_event_init_launched)
   {
-    break_loop = true;
+    break_loop_thread = true;
     proc_event_thread.join();
     InitEventListener(false, nl_socket);
     close(nl_socket);
   }
+  for (const auto &client : map_of_client_ids)
+  {
+    FD_CLR(client.first, &srv.master_fd_);
+    close(client.first);
+  }
   ReleaseLockFile(logger, fd_lockfile);
+  logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(programQuit), "");
   exit(EXIT_SUCCESS);
 }
