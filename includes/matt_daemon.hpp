@@ -16,7 +16,7 @@
 #include "errors.hpp"
 #include "aes_decrypter.hpp"
 
-# define USAGE "Usage : ./Matt_daemon\n[-c/--client MAX_ACCEPTED_CONN]. 1 <= MAX_ACCEPTED_CONN <= 100.\n[-k/--key KEY]. KEY path for aes encryption. [-p/--procevent] Enable linux kernel process event connection."
+# define USAGE "Usage : ./Matt_daemon\n[-c/--client MAX_ACCEPTED_CONN]. 1 <= MAX_ACCEPTED_CONN <= 100.\n[-k/--key KEY]. KEY path for aes encryption.\n[-p/--procevent] Enable linux kernel process event connection."
 
 void SignalHandler(int signum);
 void HandleProcEvent();
