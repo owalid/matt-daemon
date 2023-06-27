@@ -195,40 +195,39 @@ int main(int argc, char *argv[])
     print_error(USAGE, EXIT_FAILURE);
   if (argc >= 2)
   {
-    int have_args[] = {-1, -1, -1, -1};
-    ValidateArgs(argc, argv, have_args);
-
-    if (have_args[0] > 0)
-    {
-      std::cout << USAGE << std::endl;
-      exit(EXIT_SUCCESS);
-    }
-    else if (have_args[1] > 0)
-    {
-      std::string s(argv[have_args[1]+1]);
-      number_of_max_client = ReturnDigit(s);
-      if (number_of_max_client == -1)
-        print_error(USAGE, EXIT_FAILURE);
-    }
-    else if (have_args[2] > 0)
-    {
-      try
+    try {
+      int have_args[] = {-1, -1, -1, -1};
+      ValidateArgs(argc, argv, have_args);
+      if (have_args[0] > 0)
+        print_error(USAGE, EXIT_SUCCESS);
+      else if (have_args[1] > 0)
       {
+        if (argv[have_args[1]+1] == nullptr)
+          print_error(USAGE, EXIT_FAILURE);
+        std::string s(argv[have_args[1]+1]);
+        number_of_max_client = ReturnDigit(s);
+        if (number_of_max_client == -1)
+          print_error(USAGE, EXIT_FAILURE);
+      }
+      else if (have_args[2] > 0)
+      {
+        if (argv[have_args[2]+1] == nullptr)
+          print_error(USAGE, EXIT_FAILURE);
         aes.SetKey(argv[have_args[2]+1]);
         encrypt_mode = true;
       }
-      catch (const std::runtime_error &e)
+      else if (have_args[3] > 0)
       {
-        std::cerr << e.what() << std::endl;
-        exit(EXIT_FAILURE);
+        proc_event_mode = true;
       }
+      else
+        print_error(USAGE, EXIT_FAILURE);
     }
-    else if (have_args[3] > 0)
+    catch (std::exception &e)
     {
-      proc_event_mode = true;
+      std::cerr << e.what() << std::endl;
+      exit(EXIT_FAILURE);
     }
-    else
-      print_error(USAGE, EXIT_FAILURE);
   }
 
   try
