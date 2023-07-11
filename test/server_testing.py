@@ -22,7 +22,7 @@ def server_listen_good_port():
     location = "server_testing -> server_listen_good_port"
     quit_daemon()
     run_daemon()
-    res, log = validate_with_fn(f"lsof | grep 4242", lambda val: len(val) > 0)
+    res, log = validate_with_fn(f"lsof -i -P -n | grep LISTEN | grep 4242", lambda val: len(val) > 0)
     if res == True:
         print_success(location)
         return 0
@@ -35,7 +35,7 @@ def server_not_listen_after_quit():
     quit_daemon()
     run_daemon()
     quit_daemon()
-    if validate_with_return_code(f"lsof | grep 4242", 1) == True:
+    if validate_with_return_code(f"lsof -i -P -n | grep LISTEN | grep 4242", 1) == True:
         print_success(location)
         return 0
     print_error(location)
@@ -60,7 +60,7 @@ def server_cant_listen_on_port():
     _, slave = pty.openpty()
     Popen("nc -lvp 4242&", shell=True, stdin=PIPE, stdout=slave, stderr=slave, close_fds=True)
     run_daemon()
-    res, log = validate_with_fn(f"sleep 0.2; cat {LOG_FILE} | grep 'Unable to bind to any address.'", lambda val: len(val) > 0)
+    res, log = validate_with_fn(f"sleep 1; cat {LOG_FILE} | grep 'Unable to bind to any address.'", lambda val: len(val) > 0)
     # kill nc process
     run_cmd("kill $(ps aux | grep nc | grep -v grep | awk '{print $2}')")
     if res == True:
