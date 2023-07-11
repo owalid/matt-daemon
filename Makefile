@@ -2,7 +2,7 @@ CPP = c++
 
 SRC = matt_daemon.cpp event.cpp tintin_reporter.cpp utils.cpp server.cpp errors.cpp lockfile.cpp \
 			daemonize.cpp aes_decrypter.cpp proc_connector.cpp
-CPPFLAGS = -std=c++11  -pedantic -Wall -Wextra -Werror -O2
+CPPFLAGS = --std=c++11 -pedantic -Wall -Wextra -Werror -O2
 NAME = Matt_daemon
 
 SRCDIR = ./src
@@ -31,6 +31,18 @@ fclean: clean
 
 test:
 	python3 test/main.py
+
+install:
+	python3 -m pip install -r ./scripts/encrypted_command/requirements.txt
+	python3 -m pip install -r ./web/api/requirements.txt
+	npm i --prefix ./web/client/
+
+api:
+	FLASK_APP=./web/api python3 ./web/api/app.py
+
+client:
+	npm --prefix ./web/client/ run dev
+	
 
 re: fclean all
 
