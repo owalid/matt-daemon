@@ -271,11 +271,13 @@ void TintinReporter::ClearLogFile()
     logfile.close();
 }
 
-void TintinReporter::MakeArchive()
+void TintinReporter::MakeArchive(bool &make_archive)
 {
   std::string path_name(LOG_DIRECTORY);
   path_name.append("/" + this->CreateTimestampForNameFile() + "-matt_daemon_log.tar.gz");
-  std::string full_command("tar -czvf " + path_name + " " + LOG_PATH);
+  std::string full_command("tar -czvf " + path_name + " -C " + LOG_DIRECTORY + " . ");
+
+  make_archive = true;
   std::system(full_command.c_str());
 
   if (std::filesystem::exists(path_name) == true)

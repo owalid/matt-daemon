@@ -34,7 +34,7 @@ class TintinReporter
     // fonctions membres
     void MakeNewEvent(const std::string &cat, const std::string &eventValue, const std::string &additionalValue);
     void ClearLogFile();
-    void MakeArchive();
+    void MakeArchive(bool &make_archive);
     std::mutex GetLogMutex() const;
     std::string GetCategoryFromEnum(const CategoryEnum &catEnum);
     std::string GetEventFromEnum(const EventEnum &eventEnum);
