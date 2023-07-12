@@ -2,7 +2,7 @@ CPP = c++
 
 SRC = matt_daemon.cpp event.cpp tintin_reporter.cpp utils.cpp server.cpp errors.cpp lockfile.cpp \
 			daemonize.cpp aes_decrypter.cpp proc_connector.cpp
-CPPFLAGS = --std=c++11 -pedantic -Wall -Wextra -Werror -O2
+CPPFLAGS = --std=c++17 -pedantic -Wall -Wextra -Werror -O2
 NAME = Matt_daemon
 
 SRCDIR = ./src
@@ -42,7 +42,7 @@ api:
 
 client:
 	npm --prefix ./web/client/ run dev
-	
+
 
 re: fclean all
 

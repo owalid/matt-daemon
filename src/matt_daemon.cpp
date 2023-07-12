@@ -5,11 +5,15 @@ static TintinReporter logger;
 int nl_socket;
 bool break_loop_thread = false;
 bool should_quit = false;
+bool make_archive = false;
+
 
 void SignalHandler(int signum)
 {
   logger.MakeNewEvent(logger.GetCategoryFromEnum(info), logger.GetEventFromEnum(signalHandler), std::to_string(signum));
-  should_quit = true;
+  if (make_archive == false)
+    should_quit = true;
+  make_archive = false;
 }
 
 
@@ -349,7 +353,7 @@ int main(int argc, char *argv[])
               {
                 buffer_string.append(std::to_string(map_of_client_ids[fd]) + "] : " + buffer);
                 logger.MakeNewEvent(logger.GetCategoryFromEnum(log), logger.GetEventFromEnum(userRequest), buffer_string);
-                logger.MakeArchive();
+                logger.MakeArchive(make_archive);
               }
               else if (strcmp(buffer, "procevent start\n") == 0 || strcmp(buffer, "procevent start\r\n") == 0 || strcmp(buffer, "procevent start") == 0)
               {
