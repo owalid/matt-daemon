@@ -1,8 +1,8 @@
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/owalid/matt-daemon/tree/main/assets/dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://github.com/owalid/matt-daemon/tree/main/assets/light.svg">
-    <img src="https://github.com/owalid/matt-daemon/tree/main/assets/light.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/light.svg">
+    <img src="assets/light.svg">
   </picture>
 </div>
 
@@ -48,4 +48,4 @@ The Makefile are also script that you can use to build the project, install the 
 
 ## Web
 
-<img src="https://github.com/owalid/matt-daemon/tree/main/assets/web.png">
+<img src="assets/web.png">
