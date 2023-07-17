@@ -320,6 +320,7 @@ int main(int argc, char *argv[])
                 catch (const std::runtime_error &e)
                 {
                   logger.MakeNewEvent(logger.GetCategoryFromEnum(error), logger.GetEventFromEnum(programQuit), " Hard failure : " + std::string(e.what()));
+                  break;
                 }
               }
               if (strcmp(buffer, "quit\n") == 0 || strcmp(buffer, "quit\r\n") == 0 || strcmp(buffer, "quit") == 0)
