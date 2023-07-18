@@ -48,5 +48,4 @@ The Makefile are also script that you can use to build the project, install the 
 
 ## Web
 
-
-<img width="1440" height="700" src="assets/matt_daemon_website.gif">
+<video src='assets/matt_daemon_website.mp4' />
