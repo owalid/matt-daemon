@@ -1,25 +1,11 @@
 const submit_btn = document.getElementById("send")
+const text_area = document.getElementById("content")
 let timeout = false
 
-const display_feedback = (type, msg) => {
-  const feedback = document.getElementById("feedback-msg")
-  if (!timeout) {
-    feedback.style.display = "block"
-    feedback.classList.add(type)
-    feedback.textContent = msg
-    timeout = setTimeout(() => {
-      feedback.style.display = "none"
-      feedback.textContent = ""
-      feedback.classList.remove(type)
-      timeout = false
-    }, 5000)
-  }
-}
-
-submit_btn.addEventListener("click", async () => {
+const send_command = async () => {
   const feedback_error_msg = "An error occurred, please verify the api is running correctly and the daemon is running"
   try {
-    const content = document.getElementById("content").value
+    const content = text_area.value
     if (content === "") {
       display_feedback("error", "Please enter content.")
       return
@@ -43,7 +29,32 @@ submit_btn.addEventListener("click", async () => {
   catch (_err) {
     display_feedback("error", feedback_error_msg)
   } 
+}
+
+const display_feedback = (type, msg) => {
+  const feedback = document.getElementById("feedback-msg")
+  if (!timeout) {
+    feedback.style.display = "block"
+    feedback.classList.add(type)
+    feedback.textContent = msg
+    timeout = setTimeout(() => {
+      feedback.style.display = "none"
+      feedback.textContent = ""
+      feedback.classList.remove(type)
+      timeout = false
+    }, 5000)
+  }
+}
+
+
+text_area.addEventListener("keydown", (e) => {
+  // cmd + enter
+  if (e.keyCode === 13 && e.metaKey) {
+    send_command()
+  }
 })
+
+submit_btn.addEventListener("click", send_command)
 
 
 const addCommandIntoInput = (e) => {
